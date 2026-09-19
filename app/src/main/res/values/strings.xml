@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Döviz Cepte</string>
+    <string name="widget_description">Favori dövizlerinin TL karşılığını ve kur tarihini ana ekranda gör.</string>
+    <style name="Theme.Doviz" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
