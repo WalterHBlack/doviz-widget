@@ -34,7 +34,7 @@ data class RateSnapshot(val date: String, val fetchedAt: Long, val rates: Map<St
                 require(row.getString("base") == "EUR")
                 val code = row.getString("quote")
                 require(code in setOf("USD", "TRY", "GBP") && code !in rates)
-                rates[code] = row.getString("rate").toBigDecimal().also { require(it.signum() > 0) }
+                rates[code] = row.get("rate").toString().toBigDecimal().also { require(it.signum() > 0) }
                 dates += LocalDate.parse(row.getString("date")).toString()
             }
             require(rates.keys == currencyNames.keys && dates.size == 1)
