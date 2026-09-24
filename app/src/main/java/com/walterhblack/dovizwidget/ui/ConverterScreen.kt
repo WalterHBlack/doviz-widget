@@ -10,20 +10,24 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -37,6 +41,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 // @Composable: Bu fonksiyon veriden bir ekran parçası üretir; veri değişince ekran yenilenir.
 @Composable
@@ -56,16 +61,27 @@ fun ConverterScreen(model: ConverterViewModel) {
                 if (from == to) value else snapshot?.let { CurrencyMath.convert(value, from, to, it.rates) }
             }
             val context = LocalContext.current
+            val density = LocalDensity.current
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
-              val keyboardHeight by animateDpAsState(
-                  targetValue = when (keyboardMode) {
-                      KeyboardMode.Collapsed -> 72.dp
-                      KeyboardMode.Docked -> 304.dp
-                      KeyboardMode.Expanded -> maxHeight
-                  },
-                  animationSpec = tween(durationMillis = 260),
-                  label = "keyboardHeight"
-              )
+              val collapsedHeightPx = with(density) { 72.dp.toPx() }
+              val dockedHeightPx = with(density) { 304.dp.toPx() }
+              val expandedHeightPx = with(density) { maxHeight.toPx() }
+              val targetKeyboardHeightPx = when (keyboardMode) {
+                  KeyboardMode.Collapsed -> collapsedHeightPx
+                  KeyboardMode.Docked -> dockedHeightPx
+                  KeyboardMode.Expanded -> expandedHeightPx
+              }
+              val keyboardHeight = remember(density) { Animatable(dockedHeightPx) }
+              var isKeyboardDragging by remember { mutableStateOf(false) }
+              var draggedKeyboardHeightPx by remember { mutableFloatStateOf(dockedHeightPx) }
+              var releasedKeyboardHeightPx by remember { mutableFloatStateOf(Float.NaN) }
+              LaunchedEffect(targetKeyboardHeightPx, isKeyboardDragging, releasedKeyboardHeightPx) {
+                  if (isKeyboardDragging) return@LaunchedEffect
+                  if (releasedKeyboardHeightPx.isFinite()) {
+                      keyboardHeight.snapTo(releasedKeyboardHeightPx.coerceIn(collapsedHeightPx, expandedHeightPx))
+                  }
+                  keyboardHeight.animateTo(targetKeyboardHeightPx, animationSpec = tween(260))
+              }
               Column(Modifier.fillMaxSize()) {
                 AnimatedVisibility(
                   visible = keyboardMode != KeyboardMode.Expanded,
@@ -153,14 +169,30 @@ fun ConverterScreen(model: ConverterViewModel) {
                 }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
                 }
-              CurrencyKeyboard(
-                  value = amount,
-                  onValueChange = { amount = it },
-                  mode = keyboardMode,
-                  onModeChange = { keyboardMode = it },
-                  colors = colors,
-                  modifier = Modifier.fillMaxWidth().height(keyboardHeight)
-              )
+                CurrencyKeyboard(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    mode = keyboardMode,
+                    colors = colors,
+                    modifier = Modifier.fillMaxWidth().height(with(density) {
+                        (if (isKeyboardDragging) draggedKeyboardHeightPx else keyboardHeight.value).toDp()
+                    }),
+                    minHeightPx = collapsedHeightPx,
+                    dockedHeightPx = dockedHeightPx,
+                    maxHeightPx = expandedHeightPx,
+                    isDragging = isKeyboardDragging,
+                    onDragStart = {
+                        draggedKeyboardHeightPx = keyboardHeight.value
+                        isKeyboardDragging = true
+                        keyboardHeight.value
+                    },
+                    onDragHeightChange = { draggedKeyboardHeightPx = it },
+                    onDragFinish = { mode, height ->
+                        releasedKeyboardHeightPx = height
+                        keyboardMode = mode
+                        isKeyboardDragging = false
+                    }
+                )
               }
             }
         }
@@ -175,9 +207,15 @@ private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
     mode: KeyboardMode,
-    onModeChange: (KeyboardMode) -> Unit,
     colors: ColorScheme,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minHeightPx: Float,
+    dockedHeightPx: Float,
+    maxHeightPx: Float,
+    isDragging: Boolean,
+    onDragStart: () -> Float,
+    onDragHeightChange: (Float) -> Unit,
+    onDragFinish: (KeyboardMode, Float) -> Unit
 ) {
     fun press(key: String) {
         when (key) {
@@ -189,50 +227,80 @@ private fun CurrencyKeyboard(
     }
 
     Column(modifier.fillMaxWidth().background(colors.surfaceContainerHighest)) {
-        var dragDistance by remember { mutableFloatStateOf(0f) }
-        val handleDescription = when (mode) {
-            KeyboardMode.Collapsed -> "Klavyeyi aç"
-            KeyboardMode.Docked -> "Klavyeyi kapat"
-            KeyboardMode.Expanded -> "Klavyeyi küçült"
-        }
+        var isDragging by remember { mutableStateOf(false) }
         Box(
             Modifier.fillMaxWidth().height(32.dp)
                 .border(width = 1.dp, color = colors.outline)
-                .clickable(role = Role.Button) {
-                    onModeChange(if (mode == KeyboardMode.Docked) KeyboardMode.Collapsed else KeyboardMode.Docked)
-                }
-                .pointerInput(mode) {
-                    detectVerticalDragGestures(
-                        onDragStart = { dragDistance = 0f },
-                        onDragEnd = {
-                            if (dragDistance < -40f) onModeChange(KeyboardMode.Expanded)
-                            if (dragDistance > 40f) onModeChange(KeyboardMode.Collapsed)
-                        },
-                        onVerticalDrag = { change, amount ->
-                            dragDistance += amount
-                            change.consume()
+                .pointerInput(mode, minHeightPx, maxHeightPx) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        var lastX = down.position.x
+                        var lastY = down.position.y
+                        var totalX = 0f
+                        var totalY = 0f
+                        var dragging = false
+                        var rejected = false
+                        var finished = false
+                        var currentHeightPx = 0f
+
+                        while (!finished) {
+                            val event = awaitPointerEvent(PointerEventPass.Main)
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            val deltaX = change.position.x - lastX
+                            val deltaY = change.position.y - lastY
+                            lastX = change.position.x
+                            lastY = change.position.y
+
+                            if (change.pressed) {
+                                totalX += deltaX
+                                totalY += deltaY
+                                var justStartedDragging = false
+                                if (!dragging && !rejected) {
+                                    if (abs(totalX) > viewConfiguration.touchSlop && abs(totalX) > abs(totalY)) {
+                                        rejected = true
+                                    } else if (abs(totalY) > viewConfiguration.touchSlop && abs(totalY) > abs(totalX)) {
+                                        dragging = true
+                                        justStartedDragging = true
+                                        currentHeightPx = onDragStart()
+                                    }
+                                }
+                                if (dragging) {
+                                    change.consume()
+                                    val dragDelta = if (justStartedDragging) totalY else deltaY
+                                    currentHeightPx = (currentHeightPx - dragDelta).coerceIn(minHeightPx, maxHeightPx)
+                                    onDragHeightChange(currentHeightPx)
+                                    totalY = 0f
+                                }
+                            } else {
+                                finished = true
+                            }
                         }
-                    )
+
+                        if (dragging) {
+                            val stops = listOf(
+                                KeyboardMode.Collapsed to minHeightPx,
+                                KeyboardMode.Docked to dockedHeightPx.coerceIn(minHeightPx, maxHeightPx),
+                                KeyboardMode.Expanded to maxHeightPx
+                            )
+                            onDragFinish(stops.minBy { abs(it.second - currentHeightPx) }.first, currentHeightPx)
+                        }
+                    }
                 }
-                .semantics { contentDescription = handleDescription },
+                .semantics { contentDescription = "Klavyeyi tutup yukarı veya aşağı sürükle" },
             contentAlignment = Alignment.Center
         ) {
             Box(Modifier.width(48.dp).height(6.dp).background(colors.primary))
         }
         // Kapalıyken tutma yerini Android'in alt gezinme hareketinden uzak tut.
-        if (mode == KeyboardMode.Collapsed) Spacer(Modifier.height(40.dp))
-        if (mode != KeyboardMode.Collapsed) {
-            if (mode == KeyboardMode.Expanded) {
+        if (mode == KeyboardMode.Collapsed && !isDragging) Spacer(Modifier.height(40.dp))
+        if (mode != KeyboardMode.Collapsed || isDragging) {
+            if (mode == KeyboardMode.Expanded && !isDragging) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
                     Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
                     Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
                 }
             }
-            Row(
-                Modifier.fillMaxWidth().then(
-                    if (mode == KeyboardMode.Expanded) Modifier.weight(1f) else Modifier.height(272.dp)
-                )
-            ) {
+            Row(Modifier.weight(1f).fillMaxWidth()) {
                 Column(Modifier.weight(3f).fillMaxHeight()) {
                     listOf(
                         listOf("7", "8", "9"),
