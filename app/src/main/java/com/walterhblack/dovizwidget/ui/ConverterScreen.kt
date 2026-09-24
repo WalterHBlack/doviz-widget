@@ -3,6 +3,9 @@ package com.walterhblack.dovizwidget.ui
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
@@ -11,6 +14,8 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,9 +56,24 @@ fun ConverterScreen(model: ConverterViewModel) {
                 if (from == to) value else snapshot?.let { CurrencyMath.convert(value, from, to, it.rates) }
             }
             val context = LocalContext.current
-            Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-              if (keyboardMode != KeyboardMode.Expanded) {
-              Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
+            BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
+              val keyboardHeight by animateDpAsState(
+                  targetValue = when (keyboardMode) {
+                      KeyboardMode.Collapsed -> 72.dp
+                      KeyboardMode.Docked -> 304.dp
+                      KeyboardMode.Expanded -> maxHeight
+                  },
+                  animationSpec = tween(durationMillis = 260),
+                  label = "keyboardHeight"
+              )
+              Column(Modifier.fillMaxSize()) {
+                AnimatedVisibility(
+                  visible = keyboardMode != KeyboardMode.Expanded,
+                  modifier = Modifier.weight(1f),
+                  enter = fadeIn(animationSpec = tween(180)),
+                  exit = fadeOut(animationSpec = tween(180))
+                ) {
+              Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
@@ -132,16 +152,16 @@ fun ConverterScreen(model: ConverterViewModel) {
                     append("\nAnlık banka alış/satış fiyatı değildir. Hafta sonu son iş gününün kuru gösterilebilir.")
                 }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
-              }
+                }
               CurrencyKeyboard(
                   value = amount,
                   onValueChange = { amount = it },
                   mode = keyboardMode,
                   onModeChange = { keyboardMode = it },
                   colors = colors,
-                  modifier = if (keyboardMode == KeyboardMode.Expanded) Modifier.weight(1f).fillMaxWidth()
-                      else Modifier.fillMaxWidth()
+                  modifier = Modifier.fillMaxWidth().height(keyboardHeight)
               )
+              }
             }
         }
     }
@@ -197,7 +217,7 @@ private fun CurrencyKeyboard(
                 .semantics { contentDescription = handleDescription },
             contentAlignment = Alignment.Center
         ) {
-            Box(Modifier.width(48.dp).height(6.dp).background(Color(0xFF2563EB)))
+            Box(Modifier.width(48.dp).height(6.dp).background(colors.primary))
         }
         // Kapalıyken tutma yerini Android'in alt gezinme hareketinden uzak tut.
         if (mode == KeyboardMode.Collapsed) Spacer(Modifier.height(40.dp))
