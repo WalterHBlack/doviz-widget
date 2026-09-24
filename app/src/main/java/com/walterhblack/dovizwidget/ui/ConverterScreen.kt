@@ -24,7 +24,6 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -85,13 +84,10 @@ fun ConverterScreen(model: ConverterViewModel) {
               val currentKeyboardHeight = with(density) { currentKeyboardHeightPx.toDp() }
               val expansionRangePx = (expandedHeightPx - dockedHeightPx).coerceAtLeast(1f)
               val expansionProgress = ((currentKeyboardHeightPx - dockedHeightPx) / expansionRangePx).coerceIn(0f, 1f)
-              val collapseRangePx = (dockedHeightPx - collapsedHeightPx).coerceAtLeast(1f)
-              val collapseProgress = ((currentKeyboardHeightPx - collapsedHeightPx) / collapseRangePx).coerceIn(0f, 1f)
               Box(Modifier.fillMaxSize()) {
                 Column(
                   Modifier.fillMaxSize()
                     .padding(bottom = currentKeyboardHeight)
-                    .graphicsLayer { alpha = 1f - expansionProgress }
                 ) {
               Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -183,7 +179,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                     maxHeightPx = expandedHeightPx,
                     currentHeightPx = currentKeyboardHeightPx,
                     expansionProgress = expansionProgress,
-                    collapseProgress = collapseProgress,
                     isDragging = isKeyboardDragging,
                     onDragStart = {
                         draggedKeyboardHeightPx = keyboardHeight.value
@@ -217,7 +212,6 @@ private fun CurrencyKeyboard(
     maxHeightPx: Float,
     currentHeightPx: Float,
     expansionProgress: Float,
-    collapseProgress: Float,
     isDragging: Boolean,
     onDragStart: () -> Float,
     onDragHeightChange: (Float) -> Unit,
@@ -304,13 +298,12 @@ private fun CurrencyKeyboard(
             Column(
                 Modifier.fillMaxWidth().height(expandedHeaderHeight)
                     .clipToBounds()
-                    .graphicsLayer { alpha = expansionProgress }
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
                 Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
                 Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
             }
-            Row(Modifier.weight(1f).fillMaxWidth().graphicsLayer { alpha = collapseProgress }) {
+            Row(Modifier.weight(1f).fillMaxWidth()) {
                 Column(Modifier.weight(3f).fillMaxHeight()) {
                     listOf(
                         listOf("7", "8", "9"),
