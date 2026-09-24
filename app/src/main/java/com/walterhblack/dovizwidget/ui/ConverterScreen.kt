@@ -81,13 +81,16 @@ fun ConverterScreen(model: ConverterViewModel) {
                   keyboardHeight.animateTo(targetKeyboardHeightPx, animationSpec = tween(260))
               }
               val currentKeyboardHeightPx = if (isKeyboardDragging) draggedKeyboardHeightPx else keyboardHeight.value
+              val currentKeyboardHeight = with(density) { currentKeyboardHeightPx.toDp() }
               val expansionRangePx = (expandedHeightPx - dockedHeightPx).coerceAtLeast(1f)
               val expansionProgress = ((currentKeyboardHeightPx - dockedHeightPx) / expansionRangePx).coerceIn(0f, 1f)
               val collapseRangePx = (dockedHeightPx - collapsedHeightPx).coerceAtLeast(1f)
               val collapseProgress = ((currentKeyboardHeightPx - collapsedHeightPx) / collapseRangePx).coerceIn(0f, 1f)
-              Column(Modifier.fillMaxSize()) {
+              Box(Modifier.fillMaxSize()) {
                 Column(
-                  Modifier.weight(1f).fillMaxWidth().graphicsLayer { alpha = 1f - expansionProgress }
+                  Modifier.fillMaxSize()
+                    .padding(bottom = currentKeyboardHeight)
+                    .graphicsLayer { alpha = 1f - expansionProgress }
                 ) {
               Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -173,9 +176,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                     value = amount,
                     onValueChange = { amount = it },
                     colors = colors,
-                    modifier = Modifier.fillMaxWidth().height(with(density) {
-                        currentKeyboardHeightPx.toDp()
-                    }),
+                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
                     maxHeightPx = expandedHeightPx,
