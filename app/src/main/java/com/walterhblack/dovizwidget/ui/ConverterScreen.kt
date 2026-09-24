@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -231,8 +232,7 @@ private fun CurrencyKeyboard(
         }
     }
 
-    Column(modifier.fillMaxWidth().background(colors.surfaceContainerHighest)) {
-        var isDragging by remember { mutableStateOf(false) }
+    Column(modifier.fillMaxWidth().clipToBounds().background(colors.surfaceContainerHighest)) {
         Box(
             Modifier.fillMaxWidth().height(32.dp)
                 .border(width = 1.dp, color = colors.outline)
@@ -303,6 +303,7 @@ private fun CurrencyKeyboard(
             val expandedHeaderHeight = with(density) { (72.dp.toPx() * expansionProgress).toDp() }
             Column(
                 Modifier.fillMaxWidth().height(expandedHeaderHeight)
+                    .clipToBounds()
                     .graphicsLayer { alpha = expansionProgress }
                     .padding(horizontal = 20.dp, vertical = 12.dp)
             ) {
