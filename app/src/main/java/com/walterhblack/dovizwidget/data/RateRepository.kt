@@ -26,6 +26,21 @@ data class RateSnapshot(val date: String, val fetchedAt: Long, val rates: Map<St
         }
 
         fun fromResponse(raw: String, fetchedAt: Long): RateSnapshot {
+            runCatching { JSONObject(raw) }.getOrNull()?.takeIf { it.has("rates") }?.let { objectResponse ->
+                require(objectResponse.getString("base") == "EUR")
+                val values = objectResponse.getJSONObject("rates")
+                val rates = mutableMapOf("EUR" to BigDecimal.ONE)
+                val targetCodes = currencyNames.keys.filter { it != "EUR" }
+                for (code in targetCodes) {
+                    require(values.has(code))
+                    val rawRate = values.get(code)
+                    val rate = rawRate.toString().toBigDecimal().also { require(it.signum() > 0) }
+                    rates[code] = rate
+                }
+                require(rates.keys == currencyNames.keys)
+                return RateSnapshot(objectResponse.getString("date"), fetchedAt, rates)
+            }
+
             val array = JSONArray(raw)
             val rates = mutableMapOf("EUR" to BigDecimal.ONE)
             val dates = mutableSetOf<String>()
@@ -70,7 +85,7 @@ class RateRepository(context: Context) {
     }
 
     companion object {
-        const val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=USD,TRY,GBP"
+        const val ENDPOINT = "https://api.frankfurter.app/latest?from=EUR&to=USD,TRY,GBP"
         private val networkLock = Mutex()
     }
 }
