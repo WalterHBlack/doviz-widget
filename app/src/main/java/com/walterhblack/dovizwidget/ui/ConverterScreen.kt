@@ -42,7 +42,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                 if (from == to) value else snapshot?.let { CurrencyMath.convert(value, from, to, it.rates) }
             }
             val context = LocalContext.current
-            Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
+            Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+              Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
@@ -58,11 +59,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                             label = { Text("Tutar") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
                             isError = amount.isNotEmpty() && parsed == null,
                             supportingText = { if (amount.isNotEmpty() && parsed == null) Text("Örnek: 1250,50 • Binlik ayırıcı kullanma") })
-                        CurrencyKeyboard(
-                            value = amount,
-                            onValueChange = { amount = it },
-                            colors = colors
-                        )
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             CurrencyPicker("Kaynak", from, { from = it }, Modifier.weight(1f))
                             CurrencyPicker("Hedef", to, { to = it }, Modifier.weight(1f))
@@ -125,6 +121,13 @@ fun ConverterScreen(model: ConverterViewModel) {
                     }
                     append("\nAnlık banka alış/satış fiyatı değildir. Hafta sonu son iş gününün kuru gösterilebilir.")
                 }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+              }
+              CurrencyKeyboard(
+                  value = amount,
+                  onValueChange = { amount = it },
+                  colors = colors,
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 8.dp)
+              )
             }
         }
     }
@@ -132,7 +135,7 @@ fun ConverterScreen(model: ConverterViewModel) {
 
 /** Telefon klavyesini açmadan tutar girmek için uygulamanın renkli sayı klavyesi. */
 @Composable
-private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, colors: ColorScheme) {
+private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, colors: ColorScheme, modifier: Modifier = Modifier) {
     fun press(key: String) {
         when (key) {
             "C" -> onValueChange("0")
@@ -142,7 +145,7 @@ private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, col
         }
     }
 
-    Card(colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerHighest)) {
+    Card(modifier = modifier, colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerHighest)) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Tutar klavyesi", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
             listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3")).forEach { row ->
