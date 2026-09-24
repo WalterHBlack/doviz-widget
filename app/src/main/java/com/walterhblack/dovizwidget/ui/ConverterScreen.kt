@@ -3,9 +3,6 @@ package com.walterhblack.dovizwidget.ui
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
@@ -26,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -82,12 +80,14 @@ fun ConverterScreen(model: ConverterViewModel) {
                   }
                   keyboardHeight.animateTo(targetKeyboardHeightPx, animationSpec = tween(260))
               }
+              val currentKeyboardHeightPx = if (isKeyboardDragging) draggedKeyboardHeightPx else keyboardHeight.value
+              val expansionRangePx = (expandedHeightPx - dockedHeightPx).coerceAtLeast(1f)
+              val expansionProgress = ((currentKeyboardHeightPx - dockedHeightPx) / expansionRangePx).coerceIn(0f, 1f)
+              val collapseRangePx = (dockedHeightPx - collapsedHeightPx).coerceAtLeast(1f)
+              val collapseProgress = ((currentKeyboardHeightPx - collapsedHeightPx) / collapseRangePx).coerceIn(0f, 1f)
               Column(Modifier.fillMaxSize()) {
-                AnimatedVisibility(
-                  visible = keyboardMode != KeyboardMode.Expanded,
-                  modifier = Modifier.weight(1f),
-                  enter = fadeIn(animationSpec = tween(180)),
-                  exit = fadeOut(animationSpec = tween(180))
+                Column(
+                  Modifier.weight(1f).fillMaxWidth().graphicsLayer { alpha = 1f - expansionProgress }
                 ) {
               Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -172,14 +172,16 @@ fun ConverterScreen(model: ConverterViewModel) {
                 CurrencyKeyboard(
                     value = amount,
                     onValueChange = { amount = it },
-                    mode = keyboardMode,
                     colors = colors,
                     modifier = Modifier.fillMaxWidth().height(with(density) {
-                        (if (isKeyboardDragging) draggedKeyboardHeightPx else keyboardHeight.value).toDp()
+                        currentKeyboardHeightPx.toDp()
                     }),
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
                     maxHeightPx = expandedHeightPx,
+                    currentHeightPx = currentKeyboardHeightPx,
+                    expansionProgress = expansionProgress,
+                    collapseProgress = collapseProgress,
                     isDragging = isKeyboardDragging,
                     onDragStart = {
                         draggedKeyboardHeightPx = keyboardHeight.value
@@ -206,12 +208,14 @@ private enum class KeyboardMode { Collapsed, Docked, Expanded }
 private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
-    mode: KeyboardMode,
     colors: ColorScheme,
     modifier: Modifier = Modifier,
     minHeightPx: Float,
     dockedHeightPx: Float,
     maxHeightPx: Float,
+    currentHeightPx: Float,
+    expansionProgress: Float,
+    collapseProgress: Float,
     isDragging: Boolean,
     onDragStart: () -> Float,
     onDragHeightChange: (Float) -> Unit,
@@ -292,15 +296,19 @@ private fun CurrencyKeyboard(
             Box(Modifier.width(48.dp).height(6.dp).background(colors.primary))
         }
         // Kapalıyken tutma yerini Android'in alt gezinme hareketinden uzak tut.
-        if (mode == KeyboardMode.Collapsed && !isDragging) Spacer(Modifier.height(40.dp))
-        if (mode != KeyboardMode.Collapsed || isDragging) {
-            if (mode == KeyboardMode.Expanded && !isDragging) {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
-                    Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
-                    Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
-                }
+        if (currentHeightPx <= minHeightPx + 1f && !isDragging) Spacer(Modifier.height(40.dp))
+        if (currentHeightPx > minHeightPx + 1f || isDragging) {
+            val density = LocalDensity.current
+            val expandedHeaderHeight = with(density) { (72.dp.toPx() * expansionProgress).toDp() }
+            Column(
+                Modifier.fillMaxWidth().height(expandedHeaderHeight)
+                    .graphicsLayer { alpha = expansionProgress }
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
+                Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
             }
-            Row(Modifier.weight(1f).fillMaxWidth()) {
+            Row(Modifier.weight(1f).fillMaxWidth().graphicsLayer { alpha = collapseProgress }) {
                 Column(Modifier.weight(3f).fillMaxHeight()) {
                     listOf(
                         listOf("7", "8", "9"),
