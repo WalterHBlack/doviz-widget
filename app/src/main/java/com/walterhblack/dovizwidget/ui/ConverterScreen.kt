@@ -236,7 +236,7 @@ private fun CurrencyKeyboard(
         Box(
             Modifier.fillMaxWidth().height(32.dp)
                 .border(width = 1.dp, color = colors.outline)
-                .pointerInput(mode, minHeightPx, maxHeightPx) {
+                .pointerInput(minHeightPx, dockedHeightPx, maxHeightPx) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         var lastX = down.position.x
