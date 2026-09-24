@@ -85,7 +85,7 @@ class RateRepository(context: Context) {
     }
 
     companion object {
-        const val ENDPOINT = "https://api.frankfurter.app/latest?from=EUR&to=USD,TRY,GBP"
+        const val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=USD,TRY,GBP"
         private val networkLock = Mutex()
     }
 }
