@@ -12,8 +12,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -69,21 +68,20 @@ fun ConverterScreen(model: ConverterViewModel) {
                   KeyboardMode.Docked -> dockedHeightPx
                   KeyboardMode.Expanded -> expandedHeightPx
               }
-              val keyboardHeight = remember(density) { Animatable(dockedHeightPx) }
+              var keyboardHeightPx by remember(density) { mutableFloatStateOf(targetKeyboardHeightPx) }
               var isKeyboardDragging by remember { mutableStateOf(false) }
-              var draggedKeyboardHeightPx by remember { mutableFloatStateOf(dockedHeightPx) }
-              var releasedKeyboardHeightPx by remember { mutableFloatStateOf(Float.NaN) }
-              LaunchedEffect(targetKeyboardHeightPx, isKeyboardDragging, releasedKeyboardHeightPx) {
+              LaunchedEffect(targetKeyboardHeightPx, isKeyboardDragging) {
                   if (isKeyboardDragging) return@LaunchedEffect
-                  if (releasedKeyboardHeightPx.isFinite()) {
-                      keyboardHeight.snapTo(releasedKeyboardHeightPx.coerceIn(collapsedHeightPx, expandedHeightPx))
+                  animate(
+                      initialValue = keyboardHeightPx,
+                      targetValue = targetKeyboardHeightPx,
+                      animationSpec = tween(260)
+                  ) { height, _ ->
+                      keyboardHeightPx = height
                   }
-                  keyboardHeight.animateTo(targetKeyboardHeightPx, animationSpec = tween(260))
               }
-              val currentKeyboardHeightPx = if (isKeyboardDragging) draggedKeyboardHeightPx else keyboardHeight.value
+              val currentKeyboardHeightPx = keyboardHeightPx.coerceIn(collapsedHeightPx, expandedHeightPx)
               val currentKeyboardHeight = with(density) { currentKeyboardHeightPx.toDp() }
-              val expansionRangePx = (expandedHeightPx - dockedHeightPx).coerceAtLeast(1f)
-              val expansionProgress = ((currentKeyboardHeightPx - dockedHeightPx) / expansionRangePx).coerceIn(0f, 1f)
               Box(Modifier.fillMaxSize()) {
                 Column(
                   Modifier.fillMaxSize()
@@ -178,16 +176,13 @@ fun ConverterScreen(model: ConverterViewModel) {
                     dockedHeightPx = dockedHeightPx,
                     maxHeightPx = expandedHeightPx,
                     currentHeightPx = currentKeyboardHeightPx,
-                    expansionProgress = expansionProgress,
-                    isDragging = isKeyboardDragging,
                     onDragStart = {
-                        draggedKeyboardHeightPx = keyboardHeight.value
                         isKeyboardDragging = true
-                        keyboardHeight.value
+                        currentKeyboardHeightPx
                     },
-                    onDragHeightChange = { draggedKeyboardHeightPx = it },
+                    onDragHeightChange = { keyboardHeightPx = it },
                     onDragFinish = { mode, height ->
-                        releasedKeyboardHeightPx = height
+                        keyboardHeightPx = height
                         keyboardMode = mode
                         isKeyboardDragging = false
                     }
@@ -211,12 +206,11 @@ private fun CurrencyKeyboard(
     dockedHeightPx: Float,
     maxHeightPx: Float,
     currentHeightPx: Float,
-    expansionProgress: Float,
-    isDragging: Boolean,
     onDragStart: () -> Float,
     onDragHeightChange: (Float) -> Unit,
     onDragFinish: (KeyboardMode, Float) -> Unit
 ) {
+    val startDrag by rememberUpdatedState(onDragStart)
     fun press(key: String) {
         when (key) {
             "C" -> onValueChange("0")
@@ -233,8 +227,6 @@ private fun CurrencyKeyboard(
                 .pointerInput(minHeightPx, dockedHeightPx, maxHeightPx) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        var lastX = down.position.x
-                        var lastY = down.position.y
                         var totalX = 0f
                         var totalY = 0f
                         var dragging = false
@@ -245,10 +237,8 @@ private fun CurrencyKeyboard(
                         while (!finished) {
                             val event = awaitPointerEvent(PointerEventPass.Main)
                             val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                            val deltaX = change.position.x - lastX
-                            val deltaY = change.position.y - lastY
-                            lastX = change.position.x
-                            lastY = change.position.y
+                            val deltaX = change.position.x - change.previousPosition.x
+                            val deltaY = change.position.y - change.previousPosition.y
 
                             if (change.pressed) {
                                 totalX += deltaX
@@ -260,7 +250,7 @@ private fun CurrencyKeyboard(
                                     } else if (abs(totalY) > viewConfiguration.touchSlop && abs(totalY) > abs(totalX)) {
                                         dragging = true
                                         justStartedDragging = true
-                                        currentHeightPx = onDragStart()
+                                        currentHeightPx = startDrag()
                                     }
                                 }
                                 if (dragging) {
@@ -290,20 +280,23 @@ private fun CurrencyKeyboard(
         ) {
             Box(Modifier.width(48.dp).height(6.dp).background(colors.primary))
         }
-        // Kapalıyken tutma yerini Android'in alt gezinme hareketinden uzak tut.
-        if (currentHeightPx <= minHeightPx + 1f && !isDragging) Spacer(Modifier.height(40.dp))
-        if (currentHeightPx > minHeightPx + 1f || isDragging) {
+        // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
+        Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
             val density = LocalDensity.current
-            val expandedHeaderHeight = with(density) { (72.dp.toPx() * expansionProgress).toDp() }
-            Column(
-                Modifier.fillMaxWidth().height(expandedHeaderHeight)
-                    .clipToBounds()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
-            ) {
-                Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
-                Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
+            val extraHeight = with(density) { (currentHeightPx - dockedHeightPx).coerceAtLeast(0f).toDp() }
+            val closedFraction = ((dockedHeightPx - currentHeightPx) /
+                (dockedHeightPx - minHeightPx).coerceAtLeast(1f)).coerceIn(0f, 1f)
+            val gridOffset = extraHeight + 40.dp * closedFraction
+            val headerHeight = 24.dp + with(density) { 56.sp.toDp() }
+            if (extraHeight >= headerHeight) {
+                Column(Modifier.fillMaxWidth().height(headerHeight).padding(horizontal = 20.dp, vertical = 12.dp)) {
+                    Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant, maxLines = 1)
+                    Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface,
+                        maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
             }
-            Row(Modifier.weight(1f).fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().offset(y = gridOffset)
+                .wrapContentHeight(Alignment.Top, unbounded = true).height(272.dp)) {
                 Column(Modifier.weight(3f).fillMaxHeight()) {
                     listOf(
                         listOf("7", "8", "9"),

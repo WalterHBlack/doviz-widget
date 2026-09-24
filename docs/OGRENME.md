@@ -25,6 +25,8 @@ Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden l
 
 Üst ortadaki yeşil çizgi tutma yeridir: basılı tutup sürükleyince klavye parmağı takip eder, bırakınca kapalı, normal veya tam ekran konumlarından en yakınına yumuşakça oturur. Tek başına dokunmak klavyeyi hareket ettirmez. Geçişte panel yalnızca kayarak boyut değiştirir; ekran ve tuşlar soluklaşmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu üç görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
 
+Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur; kapanışta sıkışmak yerine panelin altına kayar. Tam ekran açıldığında tuşlar altta kalır, üstte tutar için alan açılır. Tutar başlığı ve değer yalnızca tamamına yer olduğunda gösterilir. Sürükleme ve bırakma animasyonu aynı yükseklik değerini kullanır; böylece bırakırken eski konuma dönülmez.
+
 Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 
 ## Kotlin'den dört küçük parça
