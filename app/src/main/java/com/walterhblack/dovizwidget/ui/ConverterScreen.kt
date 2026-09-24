@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -125,8 +127,10 @@ fun ConverterScreen(model: ConverterViewModel) {
               CurrencyKeyboard(
                   value = amount,
                   onValueChange = { amount = it },
+                  targetCurrency = to,
+                  onTargetCurrencyChange = { to = it },
                   colors = colors,
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 8.dp)
+                  modifier = Modifier.fillMaxWidth()
               )
             }
         }
@@ -135,7 +139,14 @@ fun ConverterScreen(model: ConverterViewModel) {
 
 /** Telefon klavyesini açmadan tutar girmek için uygulamanın renkli sayı klavyesi. */
 @Composable
-private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, colors: ColorScheme, modifier: Modifier = Modifier) {
+private fun CurrencyKeyboard(
+    value: String,
+    onValueChange: (String) -> Unit,
+    targetCurrency: String,
+    onTargetCurrencyChange: (String) -> Unit,
+    colors: ColorScheme,
+    modifier: Modifier = Modifier
+) {
     fun press(key: String) {
         when (key) {
             "C" -> onValueChange("0")
@@ -145,22 +156,35 @@ private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, col
         }
     }
 
-    Card(modifier = modifier, colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerHighest)) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Tutar klavyesi", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
-            listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3")).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { key ->
-                        KeyboardKey(key, colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press(key) }
-                    }
+    Column(modifier.fillMaxWidth().background(colors.surfaceContainerHighest)) {
+        // Çizimdeki mavi işaret: klavyenin üstünde, ortalanmış kısa mavi çizgi.
+        Box(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.width(40.dp).height(6.dp).background(Color(0xFF2563EB)))
+        }
+        val numberRows = listOf(
+            listOf("7", "8", "9", "USD"),
+            listOf("4", "5", "6", "EUR"),
+            listOf("1", "2", "3", "GBP")
+        )
+        numberRows.forEach { row ->
+            Row(Modifier.fillMaxWidth()) {
+                row.take(3).forEach { key ->
+                    KeyboardKey(key, colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press(key) }
+                }
+                val code = row.last()
+                val selected = targetCurrency == code
+                val currencyBackground = if (selected) Color(0xFF2563EB) else Color(0xFFF4A62A)
+                val currencyForeground = if (selected) Color.White else Color(0xFF382000)
+                KeyboardKey(code, currencyBackground, currencyForeground, Modifier.weight(1f)) {
+                    onTargetCurrencyChange(code)
                 }
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                KeyboardKey("C", colors.errorContainer, colors.onErrorContainer, Modifier.weight(1f)) { press("C") }
-                KeyboardKey("0", colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press("0") }
-                KeyboardKey(",", colors.tertiaryContainer, colors.onTertiaryContainer, Modifier.weight(1f)) { press(",") }
-                KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, Modifier.weight(1f)) { press("⌫") }
-            }
+        }
+        Row(Modifier.fillMaxWidth()) {
+            KeyboardKey("C", colors.errorContainer, colors.onErrorContainer, Modifier.weight(1f)) { press("C") }
+            KeyboardKey("0", colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press("0") }
+            KeyboardKey(",", colors.tertiaryContainer, colors.onTertiaryContainer, Modifier.weight(1f)) { press(",") }
+            KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, Modifier.weight(1f)) { press("⌫") }
         }
     }
 }
@@ -169,9 +193,10 @@ private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, col
 private fun KeyboardKey(label: String, background: Color, foreground: Color, modifier: Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(52.dp),
+        modifier = modifier.height(56.dp),
         colors = ButtonDefaults.buttonColors(containerColor = background, contentColor = foreground),
-        contentPadding = PaddingValues(0.dp)
+        contentPadding = PaddingValues(0.dp),
+        shape = RectangleShape
     ) {
         Text(label, fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }

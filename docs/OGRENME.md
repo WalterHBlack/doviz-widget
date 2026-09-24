@@ -5,7 +5,7 @@ Bu projede Kotlin davranışı, Jetpack Compose uygulama ekranını, Jetpack Gla
 ## Önce şu sırayla oku
 
 1. `app/src/main/java/com/walterhblack/dovizwidget/MainActivity.kt`: Android'in uygulamayı açtığı kapı. `setContent` hangi ekranı göstereceğimizi söyler.
-2. `ui/ConverterScreen.kt`: Tutar kutusu, para birimi seçicileri, sonuç, favoriler ve tema düğmeleri. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
+2. `ui/ConverterScreen.kt`: Tutar kutusu, sabit klavye, para birimi seçicileri, sonuç, favoriler ve tema düğmeleri. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
 3. `ui/ConverterViewModel.kt`: Yükleniyor mu, hata var mı, hangi kurlar mevcut? Ekranın ihtiyaç duyduğu bu durumları tutar. Telefon dönse de ViewModel korunur.
 4. `data/CurrencyMath.kt`: Yalnızca sayı hesabı. Android ekranını bilmez; bu yüzden hızlıca test edebiliriz.
 5. `data/RateRepository.kt`: İnternetten veriyi alır, doğrular, telefonda saklar. Ekran internet adresiyle doğrudan uğraşmaz.
@@ -20,6 +20,8 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 **Yenile → ConverterViewModel.refresh → RateRepository.refresh → internet → kayıt → ekran ve widget**
 
 **Tutar yaz → CurrencyMath.parseAmount → CurrencyMath.convert → sonuç yazısı**
+
+Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden liste yukarı aşağı giderken klavye altta sabit kalır. Klavyede dört sütun vardır: ilk üçünde rakamlar, sağ sütunda USD/EUR/GBP hedef seçimi. Mavi kısa çizgi klavyenin üst ortasında, panel ise ekranın iki kenarına kadar uzanır.
 
 Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 
