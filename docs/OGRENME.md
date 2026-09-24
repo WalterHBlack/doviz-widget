@@ -21,7 +21,9 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 
 **Tutar yaz → CurrencyMath.parseAmount → CurrencyMath.convert → sonuç yazısı**
 
-Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden liste yukarı aşağı giderken klavye altta sabit kalır. Klavyede dört sütun vardır: ilk üçünde rakamlar, sağ sütunda USD/EUR/GBP hedef seçimi. Mavi kısa çizgi klavyenin üst ortasında, panel ise ekranın iki kenarına kadar uzanır.
+Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden liste yukarı aşağı giderken klavye altta sabit kalır. İlk üç sütun 7-8-9, 4-5-6, 1-2-3 sırasındadır; 0 en alt orta tuştadır. Sağ sütunda ilk iki satırı kaplayan C, sonra virgül, en altta silme vardır. Panel iki kenara kadar uzanır.
+
+Üst ortadaki mavi çizgi aynı zamanda tutma yeridir: aşağı sürükleyince klavye kapanır, yukarı sürükleyince tam ekran açılır. Çizgiye dokununca normal boyuttan kapanır; kapalı veya tam ekran durumundan normal boyuta döner. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu üç görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
 
 Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 

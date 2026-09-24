@@ -3,8 +3,11 @@ package com.walterhblack.dovizwidget.ui
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,9 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +44,7 @@ fun ConverterScreen(model: ConverterViewModel) {
             var amount by rememberSaveable { mutableStateOf("1") }
             var from by rememberSaveable { mutableStateOf("USD") }
             var to by rememberSaveable { mutableStateOf("TRY") }
+            var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
             val parsed = CurrencyMath.parseAmount(amount)
             val snapshot = model.snapshot
             val result = parsed?.let { value ->
@@ -45,6 +52,7 @@ fun ConverterScreen(model: ConverterViewModel) {
             }
             val context = LocalContext.current
             Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+              if (keyboardMode != KeyboardMode.Expanded) {
               Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -124,26 +132,30 @@ fun ConverterScreen(model: ConverterViewModel) {
                     append("\nAnlık banka alış/satış fiyatı değildir. Hafta sonu son iş gününün kuru gösterilebilir.")
                 }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
+              }
               CurrencyKeyboard(
                   value = amount,
                   onValueChange = { amount = it },
-                  targetCurrency = to,
-                  onTargetCurrencyChange = { to = it },
+                  mode = keyboardMode,
+                  onModeChange = { keyboardMode = it },
                   colors = colors,
-                  modifier = Modifier.fillMaxWidth()
+                  modifier = if (keyboardMode == KeyboardMode.Expanded) Modifier.weight(1f).fillMaxWidth()
+                      else Modifier.fillMaxWidth()
               )
             }
         }
     }
 }
 
-/** Telefon klavyesini açmadan tutar girmek için uygulamanın renkli sayı klavyesi. */
+private enum class KeyboardMode { Collapsed, Docked, Expanded }
+
+/** Çizimdeki hesap makinesi: üç sayı sütunu, sağda C / virgül / silme sütunu. */
 @Composable
 private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
-    targetCurrency: String,
-    onTargetCurrencyChange: (String) -> Unit,
+    mode: KeyboardMode,
+    onModeChange: (KeyboardMode) -> Unit,
     colors: ColorScheme,
     modifier: Modifier = Modifier
 ) {
@@ -157,48 +169,96 @@ private fun CurrencyKeyboard(
     }
 
     Column(modifier.fillMaxWidth().background(colors.surfaceContainerHighest)) {
-        // Çizimdeki mavi işaret: klavyenin üstünde, ortalanmış kısa mavi çizgi.
-        Box(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp), contentAlignment = Alignment.Center) {
-            Box(Modifier.width(40.dp).height(6.dp).background(Color(0xFF2563EB)))
+        var dragDistance by remember { mutableFloatStateOf(0f) }
+        val handleDescription = when (mode) {
+            KeyboardMode.Collapsed -> "Klavyeyi aç"
+            KeyboardMode.Docked -> "Klavyeyi kapat"
+            KeyboardMode.Expanded -> "Klavyeyi küçült"
         }
-        val numberRows = listOf(
-            listOf("7", "8", "9", "USD"),
-            listOf("4", "5", "6", "EUR"),
-            listOf("1", "2", "3", "GBP")
-        )
-        numberRows.forEach { row ->
-            Row(Modifier.fillMaxWidth()) {
-                row.take(3).forEach { key ->
-                    KeyboardKey(key, colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press(key) }
+        Box(
+            Modifier.fillMaxWidth().height(32.dp)
+                .border(width = 1.dp, color = colors.outline)
+                .clickable(role = Role.Button) {
+                    onModeChange(if (mode == KeyboardMode.Docked) KeyboardMode.Collapsed else KeyboardMode.Docked)
                 }
-                val code = row.last()
-                val selected = targetCurrency == code
-                val currencyBackground = if (selected) Color(0xFF2563EB) else Color(0xFFF4A62A)
-                val currencyForeground = if (selected) Color.White else Color(0xFF382000)
-                KeyboardKey(code, currencyBackground, currencyForeground, Modifier.weight(1f)) {
-                    onTargetCurrencyChange(code)
+                .pointerInput(mode) {
+                    detectVerticalDragGestures(
+                        onDragStart = { dragDistance = 0f },
+                        onDragEnd = {
+                            if (dragDistance < -40f) onModeChange(KeyboardMode.Expanded)
+                            if (dragDistance > 40f) onModeChange(KeyboardMode.Collapsed)
+                        },
+                        onVerticalDrag = { change, amount ->
+                            dragDistance += amount
+                            change.consume()
+                        }
+                    )
+                }
+                .semantics { contentDescription = handleDescription },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(Modifier.width(48.dp).height(6.dp).background(Color(0xFF2563EB)))
+        }
+        // Kapalıyken tutma yerini Android'in alt gezinme hareketinden uzak tut.
+        if (mode == KeyboardMode.Collapsed) Spacer(Modifier.height(40.dp))
+        if (mode != KeyboardMode.Collapsed) {
+            if (mode == KeyboardMode.Expanded) {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                    Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
+                    Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface)
                 }
             }
-        }
-        Row(Modifier.fillMaxWidth()) {
-            KeyboardKey("C", colors.errorContainer, colors.onErrorContainer, Modifier.weight(1f)) { press("C") }
-            KeyboardKey("0", colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press("0") }
-            KeyboardKey(",", colors.tertiaryContainer, colors.onTertiaryContainer, Modifier.weight(1f)) { press(",") }
-            KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, Modifier.weight(1f)) { press("⌫") }
+            Row(
+                Modifier.fillMaxWidth().then(
+                    if (mode == KeyboardMode.Expanded) Modifier.weight(1f) else Modifier.height(272.dp)
+                )
+            ) {
+                Column(Modifier.weight(3f).fillMaxHeight()) {
+                    listOf(
+                        listOf("7", "8", "9"),
+                        listOf("4", "5", "6"),
+                        listOf("1", "2", "3"),
+                        listOf(null, "0", null)
+                    ).forEach { row ->
+                        Row(Modifier.weight(1f).fillMaxWidth()) {
+                            row.forEach { key ->
+                                KeyboardKey(
+                                    label = key,
+                                    background = colors.surfaceVariant,
+                                    foreground = colors.onSurface,
+                                    border = colors.outlineVariant,
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    onClick = key?.let { { press(it) } }
+                                )
+                            }
+                        }
+                    }
+                }
+                Column(Modifier.weight(1f).fillMaxHeight()) {
+                    KeyboardKey("C", Color(0xFFF4A62A), Color(0xFF382000), colors.outlineVariant,
+                        Modifier.weight(2f).fillMaxWidth()) { press("C") }
+                    KeyboardKey(",", Color(0xFFF4A62A), Color(0xFF382000), colors.outlineVariant,
+                        Modifier.weight(1f).fillMaxWidth()) { press(",") }
+                    KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, colors.outlineVariant,
+                        Modifier.weight(1f).fillMaxWidth()) { press("⌫") }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun KeyboardKey(label: String, background: Color, foreground: Color, modifier: Modifier, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(56.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = background, contentColor = foreground),
-        contentPadding = PaddingValues(0.dp),
-        shape = RectangleShape
+private fun KeyboardKey(
+    label: String?, background: Color, foreground: Color, border: Color,
+    modifier: Modifier, onClick: (() -> Unit)?
+) {
+    Box(
+        modifier.background(background).border(1.dp, border).then(
+            if (onClick == null) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)
+        ),
+        contentAlignment = Alignment.Center
     ) {
-        Text(label, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        if (label != null) Text(label, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = foreground)
     }
 }
 
