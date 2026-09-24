@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.walterhblack.dovizwidget.data.CurrencyMath
@@ -56,11 +54,15 @@ fun ConverterScreen(model: ConverterViewModel) {
                 Card(colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text("Döviz çevirici", style = MaterialTheme.typography.titleMedium)
-                        OutlinedTextField(value = amount, onValueChange = { if (it.length <= 20) amount = it },
+                        OutlinedTextField(value = amount, onValueChange = {}, readOnly = true,
                             label = { Text("Tutar") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             isError = amount.isNotEmpty() && parsed == null,
                             supportingText = { if (amount.isNotEmpty() && parsed == null) Text("Örnek: 1250,50 • Binlik ayırıcı kullanma") })
+                        CurrencyKeyboard(
+                            value = amount,
+                            onValueChange = { amount = it },
+                            colors = colors
+                        )
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             CurrencyPicker("Kaynak", from, { from = it }, Modifier.weight(1f))
                             CurrencyPicker("Hedef", to, { to = it }, Modifier.weight(1f))
@@ -125,6 +127,50 @@ fun ConverterScreen(model: ConverterViewModel) {
                 }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             }
         }
+    }
+}
+
+/** Telefon klavyesini açmadan tutar girmek için uygulamanın renkli sayı klavyesi. */
+@Composable
+private fun CurrencyKeyboard(value: String, onValueChange: (String) -> Unit, colors: ColorScheme) {
+    fun press(key: String) {
+        when (key) {
+            "C" -> onValueChange("0")
+            "⌫" -> onValueChange(value.dropLast(1).ifEmpty { "0" })
+            "," -> if (!value.contains(',')) onValueChange("$value,")
+            else -> if (value.length < 20) onValueChange(if (value == "0") key else "$value$key")
+        }
+    }
+
+    Card(colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerHighest)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Tutar klavyesi", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant)
+            listOf(listOf("7", "8", "9"), listOf("4", "5", "6"), listOf("1", "2", "3")).forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { key ->
+                        KeyboardKey(key, colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press(key) }
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                KeyboardKey("C", colors.errorContainer, colors.onErrorContainer, Modifier.weight(1f)) { press("C") }
+                KeyboardKey("0", colors.surfaceVariant, colors.onSurface, Modifier.weight(1f)) { press("0") }
+                KeyboardKey(",", colors.tertiaryContainer, colors.onTertiaryContainer, Modifier.weight(1f)) { press(",") }
+                KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, Modifier.weight(1f)) { press("⌫") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeyboardKey(label: String, background: Color, foreground: Color, modifier: Modifier, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(52.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = background, contentColor = foreground),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Text(label, fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }
 }
 
