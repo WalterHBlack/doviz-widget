@@ -1,8 +1,5 @@
 package com.walterhblack.dovizwidget.ui
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
@@ -22,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -34,10 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.walterhblack.dovizwidget.data.CurrencyMath
 import com.walterhblack.dovizwidget.data.WidgetCalculator
 import com.walterhblack.dovizwidget.data.currencyNames
-import com.walterhblack.dovizwidget.widget.RatesWidgetReceiver
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 // @Composable: Bu fonksiyon veriden bir ekran parçası üretir; veri değişince ekran yenilenir.
@@ -54,16 +47,13 @@ fun ConverterScreen(model: ConverterViewModel) {
             var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
             val parsed = runCatching { WidgetCalculator.evaluate(amount) }.getOrNull()
             val snapshot = model.snapshot
-            val context = LocalContext.current
             val density = LocalDensity.current
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
               val collapsedHeightPx = with(density) { 72.dp.toPx() }
               val dockedHeightPx = with(density) { 304.dp.toPx() }
-              val expandedHeightPx = with(density) { maxHeight.toPx() }
               val targetKeyboardHeightPx = when (keyboardMode) {
                   KeyboardMode.Collapsed -> collapsedHeightPx
                   KeyboardMode.Docked -> dockedHeightPx
-                  KeyboardMode.Expanded -> expandedHeightPx
               }
               var keyboardHeightPx by remember(density) { mutableFloatStateOf(targetKeyboardHeightPx) }
               var isKeyboardDragging by remember { mutableStateOf(false) }
@@ -77,7 +67,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                       keyboardHeightPx = height
                   }
               }
-              val currentKeyboardHeightPx = keyboardHeightPx.coerceIn(collapsedHeightPx, expandedHeightPx)
+              val currentKeyboardHeightPx = keyboardHeightPx.coerceIn(collapsedHeightPx, dockedHeightPx)
               val currentKeyboardHeight = with(density) { currentKeyboardHeightPx.toDp() }
               Box(Modifier.fillMaxSize()) {
                 Column(
@@ -89,19 +79,14 @@ fun ConverterScreen(model: ConverterViewModel) {
                       .padding(horizontal = 16.dp, vertical = 18.dp),
                   verticalArrangement = Arrangement.spacedBy(12.dp)
               ) {
-                  Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
-                      verticalAlignment = Alignment.CenterVertically) {
-                      Text("DÖVİZ CEPTE", color = colors.primary, fontWeight = FontWeight.Bold,
-                          letterSpacing = 2.sp, fontSize = 14.sp)
-                      TextButton(onClick = model::refresh, enabled = !model.loading) {
-                          Text(if (model.loading) "Yükleniyor…" else "Yenile ↻")
-                      }
-                  }
+                  Text("DÖVİZ CEPTE", color = colors.primary, fontWeight = FontWeight.Bold,
+                      letterSpacing = 2.sp, fontSize = 14.sp)
                   Text("Bir kur seç, tutarı yaz. Karşılıkları aynı anda gör.",
                       color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                   model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
+                  Column(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)) {
                   rowCodes.forEachIndexed { index, code ->
                       val isSource = code == from
                       var menuOpen by remember(code) { mutableStateOf(false) }
@@ -121,8 +106,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                       Row(
                           Modifier.fillMaxWidth()
-                              .background(if (isSource) colors.primaryContainer else colors.surfaceContainer,
-                                  MaterialTheme.shapes.large)
+                              .background(if (isSource) colors.primaryContainer else colors.surfaceContainer)
                               .clickable { from = code }
                               .padding(horizontal = 12.dp, vertical = 12.dp),
                           verticalAlignment = Alignment.CenterVertically
@@ -174,47 +158,15 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   modifier = Modifier.semanticsFavorite(code, code in model.favorites))
                           }
                       }
+                      if (index < rowCodes.lastIndex) {
+                          HorizontalDivider(color = colors.outlineVariant)
+                      }
+                  }
                   }
                   Text("Satıra dokununca kaynak kur değişir. Yıldızlı kurlar widget’ta görünür.",
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                  HorizontalDivider()
-                  Column(Modifier.fillMaxWidth().background(colors.surfaceContainer,
-                      MaterialTheme.shapes.large).padding(16.dp)) {
-                      Text("Tutar · $from", style = MaterialTheme.typography.labelLarge,
-                          color = colors.onSurfaceVariant)
-                      Text(amount, style = MaterialTheme.typography.headlineMedium,
-                          fontWeight = FontWeight.Bold, maxLines = 1)
-                      if (parsed == null) Text("İşlemi tamamla", color = colors.error,
-                          style = MaterialTheme.typography.bodySmall)
-                      else if (snapshot == null) Text("Kur verisi bekleniyor",
-                          style = MaterialTheme.typography.bodySmall)
-                      else Text("Günlük referans kuru · ${snapshot.date}",
-                          style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                  }
-                  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                      listOf("system" to "Sistem", "light" to "Açık", "dark" to "Koyu").forEach { (key, label) ->
-                          FilterChip(selected = model.theme == key,
-                              onClick = { model.setAppearance(key) }, label = { Text(label) })
-                      }
-                  }
-                  OutlinedButton(onClick = {
-                      val manager = AppWidgetManager.getInstance(context)
-                      if (manager.isRequestPinAppWidgetSupported) {
-                          manager.requestPinAppWidget(
-                              ComponentName(context, RatesWidgetReceiver::class.java), null, null)
-                      } else Toast.makeText(context,
-                          "Ana ekrana uzun bas → Widget’lar → Döviz Cepte", Toast.LENGTH_LONG).show()
-                  }) { Text("Widget ekle") }
-                  Text(buildString {
-                      append("Frankfurter / ECB günlük referans kuru")
-                      snapshot?.let {
-                          append(" · Son alınma: ")
-                          append(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-                              .withZone(ZoneId.systemDefault())
-                              .format(Instant.ofEpochMilli(it.fetchedAt)))
-                      }
-                      append("\nAnlık banka alış/satış fiyatı değildir.")
-                  }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                  Text("Frankfurter / ECB günlük referans kuru · Anlık banka alış/satış fiyatı değildir.",
+                      style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
                 }
                 CurrencyKeyboard(
@@ -222,11 +174,9 @@ fun ConverterScreen(model: ConverterViewModel) {
                     onValueChange = { amount = it },
                     onRefresh = model::refresh,
                     colors = colors,
-                    expanded = keyboardMode == KeyboardMode.Expanded,
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
-                    maxHeightPx = expandedHeightPx,
                     currentHeightPx = currentKeyboardHeightPx,
                     onDragStart = {
                         isKeyboardDragging = true
@@ -245,20 +195,18 @@ fun ConverterScreen(model: ConverterViewModel) {
     }
 }
 
-private enum class KeyboardMode { Collapsed, Docked, Expanded }
+private enum class KeyboardMode { Collapsed, Docked }
 
-/** Normalde sayı klavyesi; tam açıldığında widget düzenindeki dört işlem de görünür. */
+/** Widget düzenindeki sayı ve dört işlem tuşlarını taşıyan, açılıp kapanan klavye. */
 @Composable
 private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
     onRefresh: () -> Unit,
     colors: ColorScheme,
-    expanded: Boolean,
     modifier: Modifier = Modifier,
     minHeightPx: Float,
     dockedHeightPx: Float,
-    maxHeightPx: Float,
     currentHeightPx: Float,
     onDragStart: () -> Float,
     onDragHeightChange: (Float) -> Unit,
@@ -284,7 +232,7 @@ private fun CurrencyKeyboard(
         Box(
             Modifier.fillMaxWidth().height(32.dp)
                 .border(width = 1.dp, color = colors.outline)
-                .pointerInput(minHeightPx, dockedHeightPx, maxHeightPx) {
+                .pointerInput(minHeightPx, dockedHeightPx) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         var totalX = 0f
@@ -316,7 +264,7 @@ private fun CurrencyKeyboard(
                                 if (dragging) {
                                     change.consume()
                                     val dragDelta = if (justStartedDragging) totalY else deltaY
-                                    currentHeightPx = (currentHeightPx - dragDelta).coerceIn(minHeightPx, maxHeightPx)
+                                    currentHeightPx = (currentHeightPx - dragDelta).coerceIn(minHeightPx, dockedHeightPx)
                                     onDragHeightChange(currentHeightPx)
                                     totalY = 0f
                                 }
@@ -328,8 +276,7 @@ private fun CurrencyKeyboard(
                         if (dragging) {
                             val stops = listOf(
                                 KeyboardMode.Collapsed to minHeightPx,
-                                KeyboardMode.Docked to dockedHeightPx.coerceIn(minHeightPx, maxHeightPx),
-                                KeyboardMode.Expanded to maxHeightPx
+                                KeyboardMode.Docked to dockedHeightPx
                             )
                             onDragFinish(stops.minBy { abs(it.second - currentHeightPx) }.first, currentHeightPx)
                         }
@@ -342,29 +289,14 @@ private fun CurrencyKeyboard(
         }
         // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
-            val density = LocalDensity.current
-            val extraHeight = with(density) { (currentHeightPx - dockedHeightPx).coerceAtLeast(0f).toDp() }
             val closedFraction = ((dockedHeightPx - currentHeightPx) /
                 (dockedHeightPx - minHeightPx).coerceAtLeast(1f)).coerceIn(0f, 1f)
-            val gridOffset = extraHeight + 40.dp * closedFraction
-            val headerHeight = 24.dp + with(density) { 56.sp.toDp() }
-            if (extraHeight >= headerHeight) {
-                Column(Modifier.fillMaxWidth().height(headerHeight).padding(horizontal = 20.dp, vertical = 12.dp)) {
-                    Text("Tutar", style = MaterialTheme.typography.labelLarge, color = colors.onSurfaceVariant, maxLines = 1)
-                    Text(value, style = MaterialTheme.typography.headlineLarge, color = colors.onSurface,
-                        maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                }
-            }
-            val rows = if (expanded) listOf(
+            val gridOffset = 40.dp * closedFraction
+            val rows = listOf(
                 listOf("7", "8", "9", "÷", "C"),
                 listOf("4", "5", "6", "×", "⌫"),
                 listOf("1", "2", "3", "−", "↻"),
                 listOf("0", "00", ",", "+", "=")
-            ) else listOf(
-                listOf("7", "8", "9", "C"),
-                listOf("4", "5", "6", "⌫"),
-                listOf("1", "2", "3", ","),
-                listOf("0", "00", "=", "↻")
             )
             Column(Modifier.fillMaxWidth().offset(y = gridOffset).height(272.dp)) {
                 rows.forEach { row ->
@@ -373,8 +305,8 @@ private fun CurrencyKeyboard(
                             val special = key in listOf("C", "⌫", "↻", "=", "+", "−", "×", "÷")
                             KeyboardKey(
                                 label = key,
-                                background = if (special) colors.primaryContainer else colors.surfaceVariant,
-                                foreground = if (special) colors.onPrimaryContainer else colors.onSurface,
+                                background = if (special) Color(0xFF285640) else Color(0xFF343B38),
+                                foreground = if (special) Color(0xFFA5F3CF) else Color(0xFFF0FFF7),
                                 border = keyDivider,
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
                                 contentDescription = if (key == "↻") "Kurları yenile" else null,

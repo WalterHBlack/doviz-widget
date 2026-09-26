@@ -5,7 +5,7 @@ Bu projede Kotlin davranışı, Jetpack Compose uygulama ekranını, Jetpack Gla
 ## Önce şu sırayla oku
 
 1. `app/src/main/java/com/walterhblack/dovizwidget/MainActivity.kt`: Android'in uygulamayı açtığı kapı. `setContent` hangi ekranı göstereceğimizi söyler.
-2. `ui/ConverterScreen.kt`: Bayraklı kur satırları, kaynak seçimi, karşılıklar, favoriler, açılabilir klavye ve tema düğmeleri. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
+2. `ui/ConverterScreen.kt`: Bayraklı kur satırları, kaynak seçimi, karşılıklar, favoriler ve açılıp kapanan klavye. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
 3. `ui/ConverterViewModel.kt`: Yükleniyor mu, hata var mı, hangi kurlar mevcut? Ekranın ihtiyaç duyduğu bu durumları tutar. Telefon dönse de ViewModel korunur.
 4. `data/CurrencyMath.kt`: Yalnızca sayı hesabı. Android ekranını bilmez; bu yüzden hızlıca test edebiliriz.
 5. `data/RateRepository.kt`: İnternetten veriyi alır, doğrular, telefonda saklar. Ekran internet adresiyle doğrudan uğraşmaz.
@@ -21,13 +21,13 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 
 **Tutar veya işlem yaz → WidgetCalculator.evaluate → CurrencyMath.convert → bütün kur satırlarının sonucu**
 
-Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden kur listesini kaydırırken altta sabit kalır. Normal konumda sayılar, `00`, virgül, C, silme, eşittir ve kur yenileme tuşları görünür. Tam açıldığında widget'taki beş sütunlu düzen ve dört işlem tuşları görünür. Tuşların siyah kenarlıkları çizimdeki ızgara çizgilerini oluşturur. Yenileme tuşu ekrandaki Yenile düğmesiyle aynı `model.refresh()` işlemini çağırır. Panel iki kenara kadar uzanır.
+Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden kur listesini kaydırırken altta sabit kalır. Normal konumunda widget'taki beş sütunlu düzenle sayılar, `00`, virgül, C, silme, eşittir, kur yenileme ve dört işlem tuşları birlikte görünür. İşlem tuşları widget ile aynı yeşili kullanır. Tuşların siyah kenarlıkları çizimdeki ızgara çizgilerini oluşturur. Panel iki kenara kadar uzanır.
 
-Üst ortadaki yeşil çizgi tutma yeridir: basılı tutup sürükleyince klavye parmağı takip eder, bırakınca kapalı, normal veya tam ekran konumlarından en yakınına yumuşakça oturur. Tek başına dokunmak klavyeyi hareket ettirmez. Geçişte panel yalnızca kayarak boyut değiştirir; ekran ve tuşlar soluklaşmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu üç görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
+Üst ortadaki yeşil çizgi tutma yeridir: basılı tutup sürükleyince klavye parmağı takip eder, bırakınca kapalı veya normal konumdan en yakınına yumuşakça oturur. Tam ekran büyütme yoktur. Tek başına dokunmak klavyeyi hareket ettirmez. Geçişte panel yalnızca kayarak boyut değiştirir; ekran ve tuşlar soluklaşmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu iki görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
 
-Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur; kapanışta sıkışmak yerine panelin altına kayar. Tam ekran açıldığında tuşlar altta kalır, üstte tutar için alan açılır. Tutar başlığı ve değer yalnızca tamamına yer olduğunda gösterilir. Sürükleme ve bırakma animasyonu aynı yükseklik değerini kullanır; böylece bırakırken eski konuma dönülmez.
+Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur; kapanışta sıkışmak yerine panelin altına kayar. Sürükleme ve bırakma animasyonu aynı yükseklik değerini kullanır; böylece bırakırken eski konuma dönülmez.
 
-Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Yazılan tutarın seçili para birimindeki değeri aynı satırda, diğer para birimlerine çevrilmiş değerleri diğer satırlarda görünür. Para birimi okları satırların yerini değiştirebilir; yıldızlar widget favorilerini günceller. Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
+Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar aralıksız tek bir liste halinde birleşir. Yazılan tutarın seçili para birimindeki değeri aynı satırda, diğer para birimlerine çevrilmiş değerleri diğer satırlarda görünür. Para birimi okları satırların yerini değiştirebilir; yıldızlar widget favorilerini günceller. Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 
 ## Widget hesap makinesi
 
