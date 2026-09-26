@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -34,6 +33,10 @@ import com.walterhblack.dovizwidget.data.CurrencyMath
 import com.walterhblack.dovizwidget.data.WidgetCalculator
 import com.walterhblack.dovizwidget.data.currencyNames
 import com.walterhblack.dovizwidget.R
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.abs
 
 // @Composable: Bu fonksiyon veriden bir ekran parçası üretir; veri değişince ekran yenilenir.
@@ -51,6 +54,32 @@ fun ConverterScreen(model: ConverterViewModel) {
             val parsed = runCatching { WidgetCalculator.evaluate(amount) }.getOrNull()
             val snapshot = model.snapshot
             val density = LocalDensity.current
+            val updateBarColor = if (dark) Color(0xFF101715) else Color(0xFFE6EEE8)
+            val selectedRowColor = if (dark) Color(0xFF1A332B) else Color(0xFFDCEFE4)
+            var manageCurrencies by remember { mutableStateOf(false) }
+            if (manageCurrencies) {
+                AlertDialog(
+                    onDismissRequest = { manageCurrencies = false },
+                    title = { Text("Para birimlerini yönet") },
+                    text = {
+                        Column {
+                            Text("Yıldızlı kurlar widget’ta gösterilir.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.onSurfaceVariant)
+                            currencyNames.forEach { (code, name) ->
+                                Row(Modifier.fillMaxWidth().clickable { model.toggleFavorite(code) }
+                                    .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    Text("$code · $name", modifier = Modifier.weight(1f))
+                                    Checkbox(checked = code in model.favorites,
+                                        onCheckedChange = { model.toggleFavorite(code) })
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = { TextButton(onClick = { manageCurrencies = false }) { Text("Tamam") } }
+                )
+            }
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
               val collapsedHeightPx = with(density) { 72.dp.toPx() }
               val dockedHeightPx = with(density) { 304.dp.toPx() }
@@ -82,14 +111,19 @@ fun ConverterScreen(model: ConverterViewModel) {
                       .padding(horizontal = 16.dp, vertical = 18.dp),
                   verticalArrangement = Arrangement.spacedBy(12.dp)
               ) {
-                  Text("DÖVİZ CEPTE", color = colors.primary, fontWeight = FontWeight.Bold,
-                      letterSpacing = 2.sp, fontSize = 14.sp)
-                  Text("Bir kur seç, tutarı yaz. Karşılıkları aynı anda gör.",
-                      color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                  Text(
+                      snapshot?.let {
+                          "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
+                              .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
+                      } ?: "Güncel kurlar yükleniyor",
+                      Modifier.fillMaxWidth().background(updateBarColor).padding(vertical = 10.dp),
+                      color = colors.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                      style = MaterialTheme.typography.bodyMedium
+                  )
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                   model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
-                  Column(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large)) {
+                  Column(Modifier.fillMaxWidth()) {
                   rowCodes.forEachIndexed { index, code ->
                       val isSource = code == from
                       var menuOpen by remember(code) { mutableStateOf(false) }
@@ -103,9 +137,9 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                       Row(
                           Modifier.fillMaxWidth()
-                              .background(if (isSource) colors.primaryContainer else colors.surfaceContainer)
+                              .background(if (isSource) selectedRowColor else colors.background)
                               .clickable { from = code }
-                              .padding(horizontal = 12.dp, vertical = 12.dp),
+                              .padding(horizontal = 12.dp, vertical = 18.dp),
                           verticalAlignment = Alignment.CenterVertically
                       ) {
                           Image(
@@ -118,15 +152,16 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   }
                               ),
                               contentDescription = "$code bayrağı",
-                              modifier = Modifier.size(width = 60.dp, height = 40.dp)
+                              modifier = Modifier.size(width = 64.dp, height = 44.dp)
                           )
                           Spacer(Modifier.width(10.dp))
                           Box {
                               TextButton(onClick = { menuOpen = true }, contentPadding = PaddingValues(0.dp)) {
                                   Column {
-                                      Text("$code ▾", fontWeight = FontWeight.Bold,
+                                      Text("$code  ▾", fontWeight = FontWeight.Medium, fontSize = 23.sp,
                                           color = if (isSource) colors.primary else colors.onSurface)
-                                      if (isSource) Text("Kaynak", style = MaterialTheme.typography.labelSmall)
+                                      if (isSource) Text("Kaynak", style = MaterialTheme.typography.labelSmall,
+                                          color = colors.primary)
                                   }
                               }
                               DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
@@ -147,30 +182,22 @@ fun ConverterScreen(model: ConverterViewModel) {
                               }
                           }
                           Spacer(Modifier.weight(1f))
-                          Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1.5f)) {
+                          Column(horizontalAlignment = Alignment.End) {
                               Text(converted?.let { CurrencyMath.format(it) } ?: "—",
-                                  fontWeight = FontWeight.Bold, fontSize = 19.sp,
+                                  fontWeight = FontWeight.Normal, fontSize = 26.sp,
                                   color = if (isSource) colors.primary else colors.onSurface,
                                   maxLines = 1)
-                              Text(code, style = MaterialTheme.typography.labelSmall,
+                              Text(code, style = MaterialTheme.typography.bodySmall,
                                   color = colors.onSurfaceVariant)
                           }
-                          TextButton(onClick = { model.toggleFavorite(code) },
-                              contentPadding = PaddingValues(0.dp),
-                              modifier = Modifier.width(40.dp)) {
-                              Text(if (code in model.favorites) "★" else "☆",
-                                  fontSize = 26.sp, color = colors.primary,
-                                  modifier = Modifier.semanticsFavorite(code, code in model.favorites))
-                          }
-                      }
-                      if (index < rowCodes.lastIndex) {
-                          HorizontalDivider(color = colors.outlineVariant)
                       }
                   }
                   }
-                  Text("Satıra dokununca kaynak kur değişir. Yıldızlı kurlar widget’ta görünür.",
-                      style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                  Text("Frankfurter / ECB günlük referans kuru · Anlık banka alış/satış fiyatı değildir.",
+                  OutlinedButton(onClick = { manageCurrencies = true },
+                      modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
+                      Text("☷   Para birimlerini yönet", fontSize = 18.sp)
+                  }
+                  Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
                 }

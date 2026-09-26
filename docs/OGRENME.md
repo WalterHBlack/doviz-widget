@@ -5,7 +5,7 @@ Bu projede Kotlin davranışı, Jetpack Compose uygulama ekranını, Jetpack Gla
 ## Önce şu sırayla oku
 
 1. `app/src/main/java/com/walterhblack/dovizwidget/MainActivity.kt`: Android'in uygulamayı açtığı kapı. `setContent` hangi ekranı göstereceğimizi söyler.
-2. `ui/ConverterScreen.kt`: Bayraklı kur satırları, kaynak seçimi, karşılıklar, favoriler ve açılıp kapanan klavye. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
+2. `ui/ConverterScreen.kt`: Güncelleme zamanı, bayraklı kur satırları, kaynak seçimi, karşılıklar, para birimi yönetimi ve açılıp kapanan klavye. Widget favorileri para birimi yönetme penceresinden seçilir. `@Composable` bir fonksiyonun ekran çizdiğini belirtir.
 3. `ui/ConverterViewModel.kt`: Yükleniyor mu, hata var mı, hangi kurlar mevcut? Ekranın ihtiyaç duyduğu bu durumları tutar. Telefon dönse de ViewModel korunur.
 4. `data/CurrencyMath.kt`: Yalnızca sayı hesabı. Android ekranını bilmez; bu yüzden hızlıca test edebiliriz.
 5. `data/RateRepository.kt`: İnternetten veriyi alır, doğrular, telefonda saklar. Ekran internet adresiyle doğrudan uğraşmaz.
