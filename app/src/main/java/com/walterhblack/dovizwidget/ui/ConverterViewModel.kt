@@ -20,7 +20,10 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     var favorites by mutableStateOf(repository.favorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
 
-    init { refresh() }
+    init {
+        val cachedAt = snapshot?.fetchedAt ?: 0L
+        if (cachedAt == 0L || System.currentTimeMillis() - cachedAt >= 6L.hoursMillis) refresh()
+    }
 
     fun refresh() {
         if (loading) return
@@ -46,3 +49,5 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setAppearance(value: String) { theme = value; repository.setTheme(value) }
 }
+
+private val Long.hoursMillis: Long get() = this * 60L * 60L * 1000L

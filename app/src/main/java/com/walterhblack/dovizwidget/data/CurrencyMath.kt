@@ -29,4 +29,15 @@ object CurrencyMath {
             .apply { roundingMode = RoundingMode.HALF_UP }.format(value)
 }
 
-val currencyNames = linkedMapOf("TRY" to "Türk lirası", "USD" to "ABD doları", "EUR" to "Euro", "GBP" to "İngiliz sterlini")
+val currencyNames = linkedMapOf(
+    "TRY" to "Türk lirası",
+    "USD" to "ABD doları",
+    "EUR" to "Euro",
+    "GBP" to "İngiliz sterlini",
+    "JPY" to "Japon yeni",
+    "CHF" to "İsviçre frangı",
+    "CAD" to "Kanada doları",
+    "AUD" to "Avustralya doları",
+    "CNY" to "Çin yuanı",
+    "INR" to "Hindistan rupisi"
+)

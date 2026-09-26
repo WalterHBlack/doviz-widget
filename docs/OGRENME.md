@@ -31,7 +31,7 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
-`widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi TRY, USD, EUR ve GBP seçeneklerini widget içinde açar. Her widget kendi ifadesini ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
+`widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi desteklenen TRY, USD, EUR, GBP, JPY, CHF, CAD, AUD, CNY ve INR seçeneklerini widget içinde açar. Her widget kendi ifadesini ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
 
 `data/WidgetCalculator.kt` virgüllü tutarları ve dört işlemi hesaplar. Çarpma ve bölme önceliklidir; sıfıra bölme ve eksik işlemler mesajla gösterilir. Tamamlanmış ifade için sonuçlar otomatik güncellenir; eşittir ifadeyi hesaplanan tutarla değiştirir. Eşittirden sonra rakam yeni işlem başlatır, işlem işareti sonuç üzerinden devam eder. Yenileme hariç tuşlar ağ isteği yapmaz. Negatif sonuçların dönüşümü de işaret korunarak gösterilir.
 
@@ -75,6 +75,7 @@ Tüm kurlar 1 EUR karşılığı olarak gelir. Örnek **uydurma test verisi**: 1
 
 `app/src/test/java/com/walterhblack/dovizwidget/data/` altında:
 - `CurrencyMathTest.kt`: çapraz kur, ters dönüşüm, aynı para birimi, Türkçe virgül, hatalı giriş ve sıfır kur.
+- `WidgetCalculatorTest.kt`: işlem önceliği, Türkçe ondalık, sıfıra bölme ve operatör düzeltmesi.
 - `RateSnapshotTest.kt`: API yanıtının tam olması, tarihlerin eşleşmesi, pozitif kur ve kaydet/oku tutarlılığı.
 
 ## Küçük denemeler

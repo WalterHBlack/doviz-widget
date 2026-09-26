@@ -48,7 +48,7 @@ data class RateSnapshot(val date: String, val fetchedAt: Long, val rates: Map<St
                 val row = array.getJSONObject(i)
                 require(row.getString("base") == "EUR")
                 val code = row.getString("quote")
-                require(code in setOf("USD", "TRY", "GBP") && code !in rates)
+                require(code in currencyNames.keys && code != "EUR" && code !in rates)
                 rates[code] = row.get("rate").toString().toBigDecimal().also { require(it.signum() > 0) }
                 dates += LocalDate.parse(row.getString("date")).toString()
             }
@@ -85,7 +85,7 @@ class RateRepository(context: Context) {
     }
 
     companion object {
-        const val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=USD,TRY,GBP"
+        const val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=USD,TRY,GBP,JPY,CHF,CAD,AUD,CNY,INR"
         private val networkLock = Mutex()
     }
 }
