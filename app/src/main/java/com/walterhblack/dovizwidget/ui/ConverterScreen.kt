@@ -32,9 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.walterhblack.dovizwidget.data.CurrencyMath
+import com.walterhblack.dovizwidget.data.WidgetCalculator
 import com.walterhblack.dovizwidget.data.currencyNames
 import com.walterhblack.dovizwidget.widget.RatesWidgetReceiver
-import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -50,13 +50,10 @@ fun ConverterScreen(model: ConverterViewModel) {
         Surface(Modifier.fillMaxSize()) {
             var amount by rememberSaveable { mutableStateOf("1") }
             var from by rememberSaveable { mutableStateOf("USD") }
-            var to by rememberSaveable { mutableStateOf("TRY") }
+            var rowCodes by rememberSaveable { mutableStateOf(listOf("TRY", "USD", "EUR", "GBP")) }
             var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
-            val parsed = CurrencyMath.parseAmount(amount)
+            val parsed = runCatching { WidgetCalculator.evaluate(amount) }.getOrNull()
             val snapshot = model.snapshot
-            val result = parsed?.let { value ->
-                if (from == to) value else snapshot?.let { CurrencyMath.convert(value, from, to, it.rates) }
-            }
             val context = LocalContext.current
             val density = LocalDensity.current
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
@@ -87,84 +84,137 @@ fun ConverterScreen(model: ConverterViewModel) {
                   Modifier.fillMaxSize()
                     .padding(bottom = currentKeyboardHeight)
                 ) {
-              Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Column {
-                        Text("DÖVİZ CEPTE", color = colors.primary, fontWeight = FontWeight.Bold, letterSpacing = 2.sp, fontSize = 12.sp)
-                        Text("Bir bakışta döviz.", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Text("Hesapla, karşılaştır, ana ekranında takip et.", color = colors.onSurfaceVariant)
-                Card(colors = CardDefaults.cardColors(containerColor = colors.surfaceContainer)) {
-                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text("Döviz çevirici", style = MaterialTheme.typography.titleMedium)
-                        OutlinedTextField(value = amount, onValueChange = {}, readOnly = true,
-                            label = { Text("Tutar") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
-                            isError = amount.isNotEmpty() && parsed == null,
-                            supportingText = { if (amount.isNotEmpty() && parsed == null) Text("Örnek: 1250,50 • Binlik ayırıcı kullanma") })
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            CurrencyPicker("Kaynak", from, { from = it }, Modifier.weight(1f))
-                            CurrencyPicker("Hedef", to, { to = it }, Modifier.weight(1f))
-                        }
-                        TextButton(onClick = { val previous = from; from = to; to = previous }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                            Text("⇄  Para birimlerini değiştir")
-                        }
-                        HorizontalDivider()
-                        Text("KARŞILIĞI", color = colors.onSurfaceVariant, fontSize = 11.sp, letterSpacing = 2.sp)
-                        Text(result?.let { "${CurrencyMath.format(it)} $to" } ?: "—", style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold, color = colors.primary)
-                        if (snapshot != null) Text("1 $from = ${CurrencyMath.format(CurrencyMath.convert(BigDecimal.ONE, from, to, snapshot.rates), 4)} $to",
-                            style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("TL karşılıkları", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    TextButton(onClick = model::refresh, enabled = !model.loading) { Text(if (model.loading) "Yükleniyor…" else "Yenile ↻") }
-                }
-                if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-                model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodyMedium) }
-                listOf("USD", "EUR", "GBP").forEach { code ->
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text(code, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(currencyNames.getValue(code), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                        }
-                        Text(snapshot?.let { "${CurrencyMath.format(CurrencyMath.convert(BigDecimal.ONE, code, "TRY", it.rates), 4)} ₺" } ?: "—",
-                            fontWeight = FontWeight.SemiBold)
-                        TextButton(onClick = { model.toggleFavorite(code) }) {
-                            Text(if (code in model.favorites) "★" else "☆", fontSize = 24.sp,
-                                modifier = Modifier.semanticsFavorite(code, code in model.favorites))
-                        }
-                    }
-                }
-                Text("Yıldızlı para birimleri widget’ında görünür.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                Card(colors = CardDefaults.cardColors(containerColor = colors.secondaryContainer)) {
-                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Kurlar ana ekranında", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Uygulamayı açmadan favorilerini gör. Widget’taki kurlara dokunarak çeviriciyi açabilirsin.")
-                        Button(onClick = {
-                            val manager = AppWidgetManager.getInstance(context)
-                            if (manager.isRequestPinAppWidgetSupported) {
-                                manager.requestPinAppWidget(ComponentName(context, RatesWidgetReceiver::class.java), null, null)
-                            } else Toast.makeText(context, "Ana ekrana uzun bas → Widget’lar → Döviz Cepte", Toast.LENGTH_LONG).show()
-                        }) { Text("Widget ekle") }
-                    }
-                }
-                Text("Görünüm", style = MaterialTheme.typography.titleMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("system" to "Sistem", "light" to "Açık", "dark" to "Koyu").forEach { (key, label) ->
-                        FilterChip(selected = model.theme == key, onClick = { model.setAppearance(key) }, label = { Text(label) })
-                    }
-                }
-                Text(buildString {
-                    append("Günlük referans kuru · Frankfurter / ECB")
-                    snapshot?.let {
-                        append("\nKur tarihi: ${it.date}")
-                        append("\nSon alınma: " + DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt)))
-                    }
-                    append("\nAnlık banka alış/satış fiyatı değildir. Hafta sonu son iş gününün kuru gösterilebilir.")
-                }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+              Column(
+                  Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                      .padding(horizontal = 16.dp, vertical = 18.dp),
+                  verticalArrangement = Arrangement.spacedBy(12.dp)
+              ) {
+                  Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                      verticalAlignment = Alignment.CenterVertically) {
+                      Text("DÖVİZ CEPTE", color = colors.primary, fontWeight = FontWeight.Bold,
+                          letterSpacing = 2.sp, fontSize = 14.sp)
+                      TextButton(onClick = model::refresh, enabled = !model.loading) {
+                          Text(if (model.loading) "Yükleniyor…" else "Yenile ↻")
+                      }
+                  }
+                  Text("Bir kur seç, tutarı yaz. Karşılıkları aynı anda gör.",
+                      color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                  if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
+                  model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
+
+                  rowCodes.forEachIndexed { index, code ->
+                      val isSource = code == from
+                      var menuOpen by remember(code) { mutableStateOf(false) }
+                      val converted = parsed?.let { value ->
+                          if (isSource) value else snapshot?.let {
+                              runCatching {
+                                  CurrencyMath.convert(value.abs(), from, code, it.rates)
+                                      .let { result -> if (value.signum() < 0) result.negate() else result }
+                              }.getOrNull()
+                          }
+                      }
+                      val flag = when (code) {
+                          "TRY" -> "🇹🇷"
+                          "USD" -> "🇺🇸"
+                          "EUR" -> "🇪🇺"
+                          else -> "🇬🇧"
+                      }
+                      Row(
+                          Modifier.fillMaxWidth()
+                              .background(if (isSource) colors.primaryContainer else colors.surfaceContainer,
+                                  MaterialTheme.shapes.large)
+                              .clickable { from = code }
+                              .padding(horizontal = 12.dp, vertical = 12.dp),
+                          verticalAlignment = Alignment.CenterVertically
+                      ) {
+                          Box(Modifier.size(44.dp).background(colors.surface, MaterialTheme.shapes.medium),
+                              contentAlignment = Alignment.Center) {
+                              Text(flag, fontSize = 27.sp)
+                          }
+                          Spacer(Modifier.width(10.dp))
+                          Box {
+                              TextButton(onClick = { menuOpen = true }, contentPadding = PaddingValues(0.dp)) {
+                                  Column {
+                                      Text("$code ▾", fontWeight = FontWeight.Bold,
+                                          color = if (isSource) colors.primary else colors.onSurface)
+                                      if (isSource) Text("Kaynak", style = MaterialTheme.typography.labelSmall)
+                                  }
+                              }
+                              DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                  currencyNames.forEach { (newCode, name) ->
+                                      DropdownMenuItem(
+                                          text = { Text("$newCode · $name") },
+                                          onClick = {
+                                              val previousIndex = rowCodes.indexOf(newCode)
+                                              rowCodes = rowCodes.toMutableList().apply {
+                                                  this[index] = newCode
+                                                  this[previousIndex] = code
+                                              }
+                                              if (isSource) from = newCode
+                                              menuOpen = false
+                                          }
+                                      )
+                                  }
+                              }
+                          }
+                          Spacer(Modifier.weight(1f))
+                          Column(horizontalAlignment = Alignment.End, modifier = Modifier.weight(1.5f)) {
+                              Text(converted?.let { CurrencyMath.format(it) } ?: "—",
+                                  fontWeight = FontWeight.Bold, fontSize = 19.sp,
+                                  color = if (isSource) colors.primary else colors.onSurface,
+                                  maxLines = 1)
+                              Text(code, style = MaterialTheme.typography.labelSmall,
+                                  color = colors.onSurfaceVariant)
+                          }
+                          TextButton(onClick = { model.toggleFavorite(code) },
+                              contentPadding = PaddingValues(0.dp),
+                              modifier = Modifier.width(40.dp)) {
+                              Text(if (code in model.favorites) "★" else "☆",
+                                  fontSize = 26.sp, color = colors.primary,
+                                  modifier = Modifier.semanticsFavorite(code, code in model.favorites))
+                          }
+                      }
+                  }
+                  Text("Satıra dokununca kaynak kur değişir. Yıldızlı kurlar widget’ta görünür.",
+                      style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                  HorizontalDivider()
+                  Column(Modifier.fillMaxWidth().background(colors.surfaceContainer,
+                      MaterialTheme.shapes.large).padding(16.dp)) {
+                      Text("Tutar · $from", style = MaterialTheme.typography.labelLarge,
+                          color = colors.onSurfaceVariant)
+                      Text(amount, style = MaterialTheme.typography.headlineMedium,
+                          fontWeight = FontWeight.Bold, maxLines = 1)
+                      if (parsed == null) Text("İşlemi tamamla", color = colors.error,
+                          style = MaterialTheme.typography.bodySmall)
+                      else if (snapshot == null) Text("Kur verisi bekleniyor",
+                          style = MaterialTheme.typography.bodySmall)
+                      else Text("Günlük referans kuru · ${snapshot.date}",
+                          style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                  }
+                  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                      listOf("system" to "Sistem", "light" to "Açık", "dark" to "Koyu").forEach { (key, label) ->
+                          FilterChip(selected = model.theme == key,
+                              onClick = { model.setAppearance(key) }, label = { Text(label) })
+                      }
+                  }
+                  OutlinedButton(onClick = {
+                      val manager = AppWidgetManager.getInstance(context)
+                      if (manager.isRequestPinAppWidgetSupported) {
+                          manager.requestPinAppWidget(
+                              ComponentName(context, RatesWidgetReceiver::class.java), null, null)
+                      } else Toast.makeText(context,
+                          "Ana ekrana uzun bas → Widget’lar → Döviz Cepte", Toast.LENGTH_LONG).show()
+                  }) { Text("Widget ekle") }
+                  Text(buildString {
+                      append("Frankfurter / ECB günlük referans kuru")
+                      snapshot?.let {
+                          append(" · Son alınma: ")
+                          append(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+                              .withZone(ZoneId.systemDefault())
+                              .format(Instant.ofEpochMilli(it.fetchedAt)))
+                      }
+                      append("\nAnlık banka alış/satış fiyatı değildir.")
+                  }, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
                 }
                 CurrencyKeyboard(
@@ -172,6 +222,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                     onValueChange = { amount = it },
                     onRefresh = model::refresh,
                     colors = colors,
+                    expanded = keyboardMode == KeyboardMode.Expanded,
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
@@ -196,13 +247,14 @@ fun ConverterScreen(model: ConverterViewModel) {
 
 private enum class KeyboardMode { Collapsed, Docked, Expanded }
 
-/** Çizimdeki hesap makinesi: üç sayı sütunu, sağda C / virgül / silme sütunu. */
+/** Normalde sayı klavyesi; tam açıldığında widget düzenindeki dört işlem de görünür. */
 @Composable
 private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
     onRefresh: () -> Unit,
     colors: ColorScheme,
+    expanded: Boolean,
     modifier: Modifier = Modifier,
     minHeightPx: Float,
     dockedHeightPx: Float,
@@ -214,13 +266,18 @@ private fun CurrencyKeyboard(
 ) {
     val startDrag by rememberUpdatedState(onDragStart)
     val keyDivider = Color.Black
+    var calculated by rememberSaveable { mutableStateOf(false) }
     fun press(key: String) {
-        when (key) {
-            "C" -> onValueChange("0")
-            "⌫" -> onValueChange(value.dropLast(1).ifEmpty { "0" })
-            "," -> if (!value.contains(',')) onValueChange("$value,")
-            else -> if (value.length < 20) onValueChange(if (value == "0") key else "$value$key")
+        if (key == "=") {
+            runCatching { WidgetCalculator.evaluate(value) }.getOrNull()?.let {
+                onValueChange(WidgetCalculator.input(it))
+                calculated = true
+            }
+            return
         }
+        val startsNew = calculated && key in listOf("0", "00", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",")
+        onValueChange(WidgetCalculator.edit(if (startsNew) "0" else value, key))
+        calculated = false
     }
 
     Column(modifier.fillMaxWidth().clipToBounds().background(colors.surfaceContainerHighest)) {
@@ -298,38 +355,33 @@ private fun CurrencyKeyboard(
                         maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
-            Row(Modifier.fillMaxWidth().offset(y = gridOffset)
-                .wrapContentHeight(Alignment.Top, unbounded = true).height(272.dp)) {
-                Column(Modifier.weight(3f).fillMaxHeight()) {
-                    listOf(
-                        listOf("7", "8", "9"),
-                        listOf("4", "5", "6"),
-                        listOf("1", "2", "3"),
-                        listOf(null, "0", null)
-                    ).forEach { row ->
-                        Row(Modifier.weight(1f).fillMaxWidth()) {
-                            row.forEach { key ->
-                                KeyboardKey(
-                                    label = key,
-                                    background = colors.surfaceVariant,
-                                    foreground = colors.onSurface,
-                                    border = keyDivider,
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                                    onClick = key?.let { { press(it) } }
-                                )
-                            }
+            val rows = if (expanded) listOf(
+                listOf("7", "8", "9", "÷", "C"),
+                listOf("4", "5", "6", "×", "⌫"),
+                listOf("1", "2", "3", "−", "↻"),
+                listOf("0", "00", ",", "+", "=")
+            ) else listOf(
+                listOf("7", "8", "9", "C"),
+                listOf("4", "5", "6", "⌫"),
+                listOf("1", "2", "3", ","),
+                listOf("0", "00", "=", "↻")
+            )
+            Column(Modifier.fillMaxWidth().offset(y = gridOffset).height(272.dp)) {
+                rows.forEach { row ->
+                    Row(Modifier.fillMaxWidth().weight(1f)) {
+                        row.forEach { key ->
+                            val special = key in listOf("C", "⌫", "↻", "=", "+", "−", "×", "÷")
+                            KeyboardKey(
+                                label = key,
+                                background = if (special) colors.primaryContainer else colors.surfaceVariant,
+                                foreground = if (special) colors.onPrimaryContainer else colors.onSurface,
+                                border = keyDivider,
+                                modifier = Modifier.weight(1f).fillMaxHeight(),
+                                contentDescription = if (key == "↻") "Kurları yenile" else null,
+                                onClick = if (key == "↻") onRefresh else { { press(key) } }
+                            )
                         }
                     }
-                }
-                Column(Modifier.weight(1f).fillMaxHeight()) {
-                    KeyboardKey("C", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
-                        Modifier.weight(1f).fillMaxWidth()) { press("C") }
-                    KeyboardKey("↻", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
-                        Modifier.weight(1f).fillMaxWidth(), contentDescription = "Kurları yenile", onClick = onRefresh)
-                    KeyboardKey(",", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
-                        Modifier.weight(1f).fillMaxWidth()) { press(",") }
-                    KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, keyDivider,
-                        Modifier.weight(1f).fillMaxWidth()) { press("⌫") }
                 }
             }
         }
