@@ -21,7 +21,7 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 
 **Tutar yaz → CurrencyMath.parseAmount → CurrencyMath.convert → sonuç yazısı**
 
-Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden liste yukarı aşağı giderken klavye altta sabit kalır. İlk üç sütun 7-8-9, 4-5-6, 1-2-3 sırasındadır; 0 en alt orta tuştadır. Sağ sütunda ilk iki satırı kaplayan C, sonra virgül, en altta silme vardır. Panel iki kenara kadar uzanır.
+Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden liste yukarı aşağı giderken klavye altta sabit kalır. İlk üç sütun 7-8-9, 4-5-6, 1-2-3 sırasındadır; 0 en alt orta tuştadır. Sağ sütunda sırasıyla C, kur yenileme, virgül ve silme vardır. Tuşların siyah kenarlıkları çizimdeki ızgara çizgilerini oluşturur. Yenileme tuşu ekrandaki Yenile düğmesiyle aynı `model.refresh()` işlemini çağırır. Panel iki kenara kadar uzanır.
 
 Üst ortadaki yeşil çizgi tutma yeridir: basılı tutup sürükleyince klavye parmağı takip eder, bırakınca kapalı, normal veya tam ekran konumlarından en yakınına yumuşakça oturur. Tek başına dokunmak klavyeyi hareket ettirmez. Geçişte panel yalnızca kayarak boyut değiştirir; ekran ve tuşlar soluklaşmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu üç görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
 

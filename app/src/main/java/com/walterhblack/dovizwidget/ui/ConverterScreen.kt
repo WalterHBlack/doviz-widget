@@ -170,6 +170,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                 CurrencyKeyboard(
                     value = amount,
                     onValueChange = { amount = it },
+                    onRefresh = model::refresh,
                     colors = colors,
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
                     minHeightPx = collapsedHeightPx,
@@ -200,6 +201,7 @@ private enum class KeyboardMode { Collapsed, Docked, Expanded }
 private fun CurrencyKeyboard(
     value: String,
     onValueChange: (String) -> Unit,
+    onRefresh: () -> Unit,
     colors: ColorScheme,
     modifier: Modifier = Modifier,
     minHeightPx: Float,
@@ -211,6 +213,7 @@ private fun CurrencyKeyboard(
     onDragFinish: (KeyboardMode, Float) -> Unit
 ) {
     val startDrag by rememberUpdatedState(onDragStart)
+    val keyDivider = Color.Black
     fun press(key: String) {
         when (key) {
             "C" -> onValueChange("0")
@@ -310,7 +313,7 @@ private fun CurrencyKeyboard(
                                     label = key,
                                     background = colors.surfaceVariant,
                                     foreground = colors.onSurface,
-                                    border = colors.outlineVariant,
+                                    border = keyDivider,
                                     modifier = Modifier.weight(1f).fillMaxHeight(),
                                     onClick = key?.let { { press(it) } }
                                 )
@@ -319,11 +322,13 @@ private fun CurrencyKeyboard(
                     }
                 }
                 Column(Modifier.weight(1f).fillMaxHeight()) {
-                    KeyboardKey("C", Color(0xFFF4A62A), Color(0xFF382000), colors.outlineVariant,
-                        Modifier.weight(2f).fillMaxWidth()) { press("C") }
-                    KeyboardKey(",", Color(0xFFF4A62A), Color(0xFF382000), colors.outlineVariant,
+                    KeyboardKey("C", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
+                        Modifier.weight(1f).fillMaxWidth()) { press("C") }
+                    KeyboardKey("↻", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
+                        Modifier.weight(1f).fillMaxWidth(), contentDescription = "Kurları yenile", onClick = onRefresh)
+                    KeyboardKey(",", Color(0xFFF4A62A), Color(0xFF382000), keyDivider,
                         Modifier.weight(1f).fillMaxWidth()) { press(",") }
-                    KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, colors.outlineVariant,
+                    KeyboardKey("⌫", colors.secondaryContainer, colors.onSecondaryContainer, keyDivider,
                         Modifier.weight(1f).fillMaxWidth()) { press("⌫") }
                 }
             }
@@ -334,10 +339,13 @@ private fun CurrencyKeyboard(
 @Composable
 private fun KeyboardKey(
     label: String?, background: Color, foreground: Color, border: Color,
-    modifier: Modifier, onClick: (() -> Unit)?
+    modifier: Modifier, contentDescription: String? = null, onClick: (() -> Unit)?
 ) {
+    val accessibility = if (contentDescription == null) Modifier else Modifier.semantics {
+        this.contentDescription = contentDescription
+    }
     Box(
-        modifier.background(background).border(1.dp, border).then(
+        modifier.background(background).border(1.dp, border).then(accessibility).then(
             if (onClick == null) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)
         ),
         contentAlignment = Alignment.Center
