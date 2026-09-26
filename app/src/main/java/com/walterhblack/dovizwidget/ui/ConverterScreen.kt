@@ -118,8 +118,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   }
                               ),
                               contentDescription = "$code bayrağı",
-                              modifier = Modifier.size(width = 48.dp, height = 32.dp)
-                                  .border(1.dp, colors.outlineVariant)
+                              modifier = Modifier.size(width = 60.dp, height = 40.dp)
                           )
                           Spacer(Modifier.width(10.dp))
                           Box {
