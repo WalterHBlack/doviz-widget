@@ -66,6 +66,8 @@ class RateRepository(context: Context) {
     fun setFavorites(codes: Set<String>) { prefs.edit().putStringSet("favorites", codes).apply() }
     fun theme(): String = prefs.getString("theme", "system")!!
     fun setTheme(value: String) { prefs.edit().putString("theme", value).apply() }
+    fun uiScale(): String = prefs.getString("ui_scale", "normal")!!
+    fun setUiScale(value: String) { prefs.edit().putString("ui_scale", value).apply() }
 
     suspend fun refresh(): RateSnapshot = withContext(Dispatchers.IO) {
         networkLock.withLock {

@@ -59,6 +59,12 @@ fun ConverterScreen(model: ConverterViewModel) {
             val updateBarColor = if (dark) Color(0xFF101715) else Color(0xFFE6EEE8)
             val selectedRowColor = if (dark) Color(0xFF1A332B) else Color(0xFFDCEFE4)
             var manageCurrencies by remember { mutableStateOf(false) }
+            var showSettings by remember { mutableStateOf(false) }
+            val uiScale = when (model.uiScale) {
+                "compact" -> 0.90f
+                "large" -> 1.10f
+                else -> 1f
+            }
             if (manageCurrencies) {
                 AlertDialog(
                     onDismissRequest = { manageCurrencies = false },
@@ -82,9 +88,40 @@ fun ConverterScreen(model: ConverterViewModel) {
                     confirmButton = { TextButton(onClick = { manageCurrencies = false }) { Text("Tamam") } }
                 )
             }
+            if (showSettings) {
+                AlertDialog(
+                    onDismissRequest = { showSettings = false },
+                    title = { Text("Ayarlar") },
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text("Tema", style = MaterialTheme.typography.titleSmall)
+                            listOf("system" to "Sistem", "light" to "Beyaz mod", "dark" to "Siyah mod").forEach { (value, label) ->
+                                Row(
+                                    Modifier.fillMaxWidth().clickable { model.setAppearance(value) },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(selected = model.theme == value, onClick = { model.setAppearance(value) })
+                                    Text(label)
+                                }
+                            }
+                            Text("Arayüz boyutu", style = MaterialTheme.typography.titleSmall)
+                            listOf("compact" to "Küçük", "normal" to "Normal", "large" to "Büyük").forEach { (value, label) ->
+                                Row(
+                                    Modifier.fillMaxWidth().clickable { model.setInterfaceScale(value) },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(selected = model.uiScale == value, onClick = { model.setInterfaceScale(value) })
+                                    Text(label)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = { TextButton(onClick = { showSettings = false }) { Text("Tamam") } }
+                )
+            }
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
-              val collapsedHeightPx = with(density) { 72.dp.toPx() }
-              val dockedHeightPx = with(density) { 304.dp.toPx() }
+              val collapsedHeightPx = with(density) { 72.dp.toPx() * uiScale }
+              val dockedHeightPx = with(density) { 304.dp.toPx() * uiScale }
               val targetKeyboardHeightPx = when (keyboardMode) {
                   KeyboardMode.Collapsed -> collapsedHeightPx
                   KeyboardMode.Docked -> dockedHeightPx
@@ -108,24 +145,27 @@ fun ConverterScreen(model: ConverterViewModel) {
                   Modifier.fillMaxSize()
                     .padding(bottom = currentKeyboardHeight)
                 ) {
-              Column(
+                  Column(
                   Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                      .padding(horizontal = 16.dp, vertical = 18.dp),
-                  verticalArrangement = Arrangement.spacedBy(12.dp)
+                      .padding(horizontal = 16.dp * uiScale, vertical = 18.dp * uiScale),
+                  verticalArrangement = Arrangement.spacedBy(12.dp * uiScale)
               ) {
-                  Row(Modifier.fillMaxWidth().background(updateBarColor).padding(start = 16.dp, end = 8.dp),
+                  Row(Modifier.fillMaxWidth().background(updateBarColor).padding(start = 16.dp * uiScale, end = 8.dp * uiScale),
                       verticalAlignment = Alignment.CenterVertically) {
                       Text(
                           snapshot?.let {
                               "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
                                   .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
                           } ?: "Güncel kurlar yükleniyor",
-                          Modifier.weight(1f).padding(vertical = 10.dp),
+                          Modifier.weight(1f).padding(vertical = 10.dp * uiScale),
                           color = colors.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                           style = MaterialTheme.typography.bodyMedium
                       )
                       TextButton(onClick = { manageCurrencies = true }, contentPadding = PaddingValues(horizontal = 8.dp)) {
                           Text("Yönet")
+                      }
+                      TextButton(onClick = { showSettings = true }, contentPadding = PaddingValues(horizontal = 8.dp)) {
+                          Text("⚙ Ayarlar")
                       }
                   }
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -147,7 +187,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                           Modifier.fillMaxWidth()
                               .background(if (isSource) selectedRowColor else colors.background)
                               .clickable { from = code }
-                              .padding(horizontal = 12.dp, vertical = 18.dp),
+                              .padding(horizontal = 12.dp * uiScale, vertical = 18.dp * uiScale),
                           verticalAlignment = Alignment.CenterVertically
                       ) {
                               Image(
@@ -166,13 +206,13 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   }
                               ),
                               contentDescription = "$code bayrağı",
-                              modifier = Modifier.size(width = 64.dp, height = 44.dp)
+                              modifier = Modifier.size(width = 64.dp * uiScale, height = 44.dp * uiScale)
                           )
-                          Spacer(Modifier.width(10.dp))
+                          Spacer(Modifier.width(10.dp * uiScale))
                           Box {
                               TextButton(onClick = { menuOpen = true }, contentPadding = PaddingValues(horizontal = 4.dp)) {
                                   Column {
-                                      Text("$code  ▾", fontWeight = FontWeight.Medium, fontSize = 23.sp,
+                                  Text("$code  ▾", fontWeight = FontWeight.Medium, fontSize = (23.sp.value * uiScale).sp,
                                           color = if (isSource) colors.primary else colors.onSurface)
                                       if (isSource) Text("Kaynak", style = MaterialTheme.typography.labelSmall,
                                           color = colors.primary, modifier = Modifier.padding(start = 4.dp))
@@ -198,7 +238,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                           Spacer(Modifier.weight(1f))
                           Column(horizontalAlignment = Alignment.End) {
                               Text(converted?.let { CurrencyMath.format(it) } ?: "—",
-                                  fontWeight = FontWeight.Normal, fontSize = 26.sp,
+                                  fontWeight = FontWeight.Normal, fontSize = (26.sp.value * uiScale).sp,
                                   color = if (isSource) colors.primary else colors.onSurface,
                                   maxLines = 1)
                               Text(code, style = MaterialTheme.typography.bodySmall,
@@ -208,7 +248,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                   }
                   }
                   Column(Modifier.fillMaxWidth().background(colors.surfaceContainer, MaterialTheme.shapes.medium)
-                      .padding(horizontal = 16.dp, vertical = 10.dp)) {
+                      .padding(horizontal = 16.dp * uiScale, vertical = 10.dp * uiScale)) {
                       Text("Tutar", style = MaterialTheme.typography.labelSmall,
                           color = colors.onSurfaceVariant)
                       Text(amount, style = MaterialTheme.typography.titleLarge,
@@ -219,8 +259,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                   }
                   OutlinedButton(onClick = { manageCurrencies = true },
-                      modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
-                      Text("☷   Widget favorilerini yönet", fontSize = 18.sp)
+                      modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp * uiScale)) {
+                      Text("☷   Widget favorilerini yönet", fontSize = (18.sp.value * uiScale).sp)
                   }
                   Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
@@ -234,6 +274,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                     onToggle = {
                         keyboardMode = if (keyboardMode == KeyboardMode.Docked) KeyboardMode.Collapsed else KeyboardMode.Docked
                     },
+                    uiScale = uiScale,
                     modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
@@ -265,6 +306,7 @@ private fun CurrencyKeyboard(
     onRefresh: () -> Unit,
     colors: ColorScheme,
     onToggle: () -> Unit,
+    uiScale: Float,
     modifier: Modifier = Modifier,
     minHeightPx: Float,
     dockedHeightPx: Float,
@@ -291,7 +333,7 @@ private fun CurrencyKeyboard(
 
     Column(modifier.fillMaxWidth().clipToBounds().background(colors.surfaceContainerHighest)) {
         Box(
-            Modifier.fillMaxWidth().height(32.dp)
+            Modifier.fillMaxWidth().height(32.dp * uiScale)
                 .border(width = 1.dp, color = colors.outline)
                 .pointerInput(minHeightPx, dockedHeightPx) {
                     awaitEachGesture {
@@ -347,20 +389,20 @@ private fun CurrencyKeyboard(
                 .semantics { contentDescription = "Klavyeyi aç veya kapat; sürükleyerek de taşı" },
             contentAlignment = Alignment.Center
         ) {
-            Box(Modifier.width(48.dp).height(6.dp).background(colors.primary))
+            Box(Modifier.width(48.dp * uiScale).height(6.dp * uiScale).background(colors.primary))
         }
         // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
             val closedFraction = ((dockedHeightPx - currentHeightPx) /
                 (dockedHeightPx - minHeightPx).coerceAtLeast(1f)).coerceIn(0f, 1f)
-            val gridOffset = 40.dp * closedFraction
+            val gridOffset = 40.dp * closedFraction * uiScale
             val rows = listOf(
                 listOf("7", "8", "9", "÷", "C"),
                 listOf("4", "5", "6", "×", "⌫"),
                 listOf("1", "2", "3", "−", "↻"),
                 listOf("0", "00", ",", "+", "=")
             )
-            Column(Modifier.fillMaxWidth().offset(y = gridOffset).height(272.dp)) {
+            Column(Modifier.fillMaxWidth().offset(y = gridOffset).height(272.dp * uiScale)) {
                 rows.forEach { row ->
                     Row(Modifier.fillMaxWidth().weight(1f)) {
                         row.forEach { key ->

@@ -19,6 +19,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     var error by mutableStateOf<String?>(null); private set
     var favorites by mutableStateOf(repository.favorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
+    var uiScale by mutableStateOf(repository.uiScale()); private set
 
     init {
         val cachedAt = snapshot?.fetchedAt ?: 0L
@@ -48,6 +49,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun setAppearance(value: String) { theme = value; repository.setTheme(value) }
+    fun setInterfaceScale(value: String) { uiScale = value; repository.setUiScale(value) }
 }
 
 private val Long.hoursMillis: Long get() = this * 60L * 60L * 1000L
