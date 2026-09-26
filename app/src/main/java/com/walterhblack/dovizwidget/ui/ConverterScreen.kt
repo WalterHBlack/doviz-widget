@@ -3,6 +3,7 @@ package com.walterhblack.dovizwidget.ui
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -28,6 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Path
 import com.walterhblack.dovizwidget.data.CurrencyMath
 import com.walterhblack.dovizwidget.data.WidgetCalculator
 import com.walterhblack.dovizwidget.data.currencyNames
@@ -98,12 +100,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                               }.getOrNull()
                           }
                       }
-                      val flag = when (code) {
-                          "TRY" -> "🇹🇷"
-                          "USD" -> "🇺🇸"
-                          "EUR" -> "🇪🇺"
-                          else -> "🇬🇧"
-                      }
                       Row(
                           Modifier.fillMaxWidth()
                               .background(if (isSource) colors.primaryContainer else colors.surfaceContainer)
@@ -111,10 +107,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                               .padding(horizontal = 12.dp, vertical = 12.dp),
                           verticalAlignment = Alignment.CenterVertically
                       ) {
-                          Box(Modifier.size(44.dp).background(colors.surface, MaterialTheme.shapes.medium),
-                              contentAlignment = Alignment.Center) {
-                              Text(flag, fontSize = 27.sp)
-                          }
+                          FlagMark(code, Modifier.size(width = 48.dp, height = 32.dp)
+                              .border(1.dp, colors.outlineVariant))
                           Spacer(Modifier.width(10.dp))
                           Box {
                               TextButton(onClick = { menuOpen = true }, contentPadding = PaddingValues(0.dp)) {
@@ -336,6 +330,68 @@ private fun KeyboardKey(
     ) {
         if (label != null) Text(label, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = foreground)
     }
+}
+
+@Composable
+private fun FlagMark(code: String, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        fun rect(color: Color, top: Float = 0f, bottom: Float = h) {
+            drawRect(color, topLeft = androidx.compose.ui.geometry.Offset(0f, top),
+                size = androidx.compose.ui.geometry.Size(w, bottom - top))
+        }
+        when (code) {
+            "TRY" -> {
+                rect(Color(0xFFE92935))
+                drawCircle(Color.White, h * .28f, androidx.compose.ui.geometry.Offset(w * .42f, h / 2))
+                drawCircle(Color(0xFFE92935), h * .22f, androidx.compose.ui.geometry.Offset(w * .50f, h / 2))
+                drawPath(starPath(w * .68f, h / 2, h * .18f, h * .08f), Color.White)
+            }
+            "USD" -> {
+                repeat(7) { i -> rect(if (i % 2 == 0) Color(0xFFD94755) else Color.White, i * h / 7, (i + 1) * h / 7) }
+                drawRect(Color(0xFF315A9D), size = androidx.compose.ui.geometry.Size(w * .43f, h * .54f))
+            }
+            "EUR" -> {
+                rect(Color(0xFF1D55A5))
+                drawCircle(Color(0xFFFFD34E), h * .07f, androidx.compose.ui.geometry.Offset(w * .50f, h * .22f))
+                repeat(8) { i ->
+                    val angle = Math.toRadians(i * 45.0)
+                    drawCircle(Color(0xFFFFD34E), h * .055f,
+                        androidx.compose.ui.geometry.Offset(w * .50f + kotlin.math.cos(angle).toFloat() * h * .28f,
+                            h * .50f + kotlin.math.sin(angle).toFloat() * h * .28f))
+                }
+            }
+            else -> {
+                rect(Color(0xFF244A94))
+                drawRect(Color(0xFFE54B58), topLeft = androidx.compose.ui.geometry.Offset(w * .42f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * .16f, h))
+                drawRect(Color(0xFFE54B58), topLeft = androidx.compose.ui.geometry.Offset(0f, h * .38f),
+                    size = androidx.compose.ui.geometry.Size(w, h * .24f))
+                drawRect(Color.White, topLeft = androidx.compose.ui.geometry.Offset(w * .36f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * .28f, h))
+                drawRect(Color.White, topLeft = androidx.compose.ui.geometry.Offset(0f, h * .31f),
+                    size = androidx.compose.ui.geometry.Size(w, h * .38f))
+                drawRect(Color(0xFFE54B58), topLeft = androidx.compose.ui.geometry.Offset(w * .42f, 0f),
+                    size = androidx.compose.ui.geometry.Size(w * .16f, h))
+                drawRect(Color(0xFFE54B58), topLeft = androidx.compose.ui.geometry.Offset(0f, h * .42f),
+                    size = androidx.compose.ui.geometry.Size(w, h * .16f))
+            }
+        }
+    }
+}
+
+private fun starPath(cx: Float, cy: Float, outer: Float, inner: Float): Path {
+    val path = Path()
+    repeat(10) { i ->
+        val angle = Math.toRadians(-90.0 + i * 36.0)
+        val radius = if (i % 2 == 0) outer else inner
+        val x = cx + kotlin.math.cos(angle).toFloat() * radius
+        val y = cy + kotlin.math.sin(angle).toFloat() * radius
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    return path
 }
 
 @Composable
