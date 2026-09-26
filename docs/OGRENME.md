@@ -29,6 +29,14 @@ Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur; kapanışta s
 
 Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 
+## Widget hesap makinesi
+
+`widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi TRY, USD, EUR ve GBP seçeneklerini widget içinde açar. Her widget kendi ifadesini ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
+
+`data/WidgetCalculator.kt` virgüllü tutarları ve dört işlemi hesaplar. Çarpma ve bölme önceliklidir; sıfıra bölme ve eksik işlemler mesajla gösterilir. Tamamlanmış ifade için sonuçlar otomatik güncellenir; eşittir ifadeyi hesaplanan tutarla değiştirir. Eşittirden sonra rakam yeni işlem başlatır, işlem işareti sonuç üzerinden devam eder. Yenileme hariç tuşlar ağ isteği yapmaz. Negatif sonuçların dönüşümü de işaret korunarak gösterilir.
+
+Widget için 4×6 hücrelik büyük alan önerilir. Yeterli yer yoksa büyütme açıklaması gösterilir. Üst başlık uygulamayı açar; klavye ve hedef seçimi uygulamayı açmaz. Tuş sıraları `7 8 9 ÷ C`, `4 5 6 × ⌫`, `1 2 3 − ↻`, `0 00 , + =` şeklindedir.
+
 ## Kotlin'den dört küçük parça
 
 ```kotlin

@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.Composable
+import androidx.glance.action.Action
+import androidx.glance.action.actionParametersOf
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.*
@@ -20,14 +24,34 @@ import androidx.glance.unit.ColorProvider
 import androidx.work.*
 import com.walterhblack.dovizwidget.MainActivity
 import com.walterhblack.dovizwidget.data.*
-import java.math.BigDecimal
 
 private val snapshotKey = stringPreferencesKey("snapshot")
 private val favoritesKey = stringPreferencesKey("favorites")
 private val statusKey = stringPreferencesKey("status")
+private val expressionKey = stringPreferencesKey("calculator_expression")
+private val targetKey = stringPreferencesKey("calculator_target")
+private val choosingTargetKey = booleanPreferencesKey("choosing_target")
+private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
+private val keyParameter = ActionParameters.Key<String>("calculator_key")
+private val accent = ColorProvider(Color(0xFFA5F3CF))
+private val foreground = ColorProvider(Color(0xFFF0FFF7))
+
+private fun calculatorAction(key: String): Action = actionRunCallback<CalculatorAction>(
+    actionParametersOf(keyParameter to key))
+
+@Composable
+private fun WidgetKey(label: String, modifier: GlanceModifier, action: Action, operation: Boolean = false) {
+    Box(modifier.background(Color.Black).padding(1.dp)) {
+        Box(GlanceModifier.fillMaxSize().background(if (operation) Color(0xFF285640) else Color(0xFF343B38))
+            .clickable(action), contentAlignment = Alignment.Center) {
+            Text(label, style = TextStyle(color = foreground, fontSize = 20.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+        }
+    }
+}
 
 // Widget ayrı bir Android yüzeyidir; uygulama ekranının küçültülmüş kopyası değildir.
 class RatesWidget : GlanceAppWidget() {
+    override val sizeMode = SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repository = RateRepository(context)
         val initialSnapshot = repository.cached()
@@ -36,34 +60,104 @@ class RatesWidget : GlanceAppWidget() {
             val state = currentState<Preferences>()
             val snapshot = state[snapshotKey]?.let { runCatching { RateSnapshot.decode(it) }.getOrNull() } ?: initialSnapshot
             val favorites = state[favoritesKey]?.split(',')?.filter { it.isNotBlank() }?.toSet() ?: initialFavorites
-            val foreground = ColorProvider(Color(0xFFF0FFF7))
-            val accent = ColorProvider(Color(0xFFA5F3CF))
-            Column(GlanceModifier.fillMaxSize().background(Color(0xFF14241F)).padding(16.dp)) {
-                Column(GlanceModifier.fillMaxWidth().defaultWeight().clickable(actionStartActivity<MainActivity>())) {
-                    Text("DÖVİZ CEPTE", style = TextStyle(color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold))
-                    Spacer(GlanceModifier.height(8.dp))
-                    if (snapshot == null) {
-                        Text("Kurlar için Yenile’ye dokun.", style = TextStyle(color = foreground, fontSize = 14.sp))
-                    } else if (favorites.isEmpty()) {
-                        Text("Uygulamadan favori seç.", style = TextStyle(color = foreground, fontSize = 14.sp))
-                    } else {
-                        listOf("USD", "EUR", "GBP").filter { it in favorites }.forEach { code ->
-                            Text("$code   ${CurrencyMath.format(CurrencyMath.convert(BigDecimal.ONE, code, "TRY", snapshot.rates), 4)} ₺",
-                                style = TextStyle(color = foreground, fontSize = 17.sp, fontWeight = FontWeight.Bold))
+            val expression = state[expressionKey] ?: "1"
+            val target = state[targetKey]?.takeIf { it in currencyNames } ?: "TRY"
+            val calculation = runCatching { WidgetCalculator.evaluate(expression) }
+            val amount = calculation.getOrNull()
+            val size = LocalSize.current
+            Column(GlanceModifier.fillMaxSize().background(Color(0xFF14241F)).padding(8.dp)) {
+                Text("DÖVİZ CEPTE · Favoriler ↗", modifier = GlanceModifier.fillMaxWidth().padding(4.dp)
+                    .clickable(actionStartActivity<MainActivity>()),
+                    style = TextStyle(color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                if (size.width < 250.dp || size.height < 380.dp) {
+                    Text("Hesap makinesi için widget’ı büyüt.", style = TextStyle(color = foreground, fontSize = 14.sp))
+                } else {
+                    Row(GlanceModifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(GlanceModifier.defaultWeight().padding(4.dp)) {
+                            Text("Tutar", style = TextStyle(color = accent, fontSize = 11.sp))
+                            Text(expression, style = TextStyle(color = foreground, fontSize = 18.sp), maxLines = 1)
+                        }
+                        Text("Hedef: $target ▾", modifier = GlanceModifier.padding(10.dp).clickable(calculatorAction("target")),
+                            style = TextStyle(color = accent, fontSize = 14.sp, fontWeight = FontWeight.Bold))
+                    }
+                    Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                        if (state[choosingTargetKey] == true) {
+                            Row(GlanceModifier.fillMaxWidth().height(48.dp)) {
+                                currencyNames.keys.forEach { code ->
+                                    WidgetKey(code, GlanceModifier.defaultWeight().fillMaxHeight(), calculatorAction("target:$code"), true)
+                                }
+                            }
+                        } else {
+                            if (favorites.isEmpty()) Text("Uygulamadan yıldızla favori seç.",
+                                style = TextStyle(color = foreground, fontSize = 13.sp))
+                            currencyNames.keys.filter { it in favorites }.forEach { code ->
+                                val converted = amount?.let { value ->
+                                    if (code == target) value else snapshot?.let {
+                                        val positive = CurrencyMath.convert(value.abs(), code, target, it.rates)
+                                        if (value.signum() < 0) positive.negate() else positive
+                                    }
+                                }
+                                Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(code, style = TextStyle(color = accent, fontSize = 15.sp, fontWeight = FontWeight.Bold))
+                                    Text("${converted?.let { CurrencyMath.format(it) } ?: "—"} $target",
+                                        modifier = GlanceModifier.defaultWeight(),
+                                        style = TextStyle(color = foreground, fontSize = 15.sp, textAlign = TextAlign.End), maxLines = 1)
+                                }
+                            }
+                            if (calculation.isFailure) Text(calculation.exceptionOrNull()?.message ?: "İşlemi tamamla.",
+                                style = TextStyle(color = accent, fontSize = 11.sp), maxLines = 1)
+                            else if (snapshot == null) Text("Kurlar için ↻ tuşuna dokun.", style = TextStyle(color = accent, fontSize = 11.sp))
                         }
                     }
-                    Spacer(GlanceModifier.height(6.dp))
-                    Text("Kur: ${snapshot?.date ?: "—"} · Günlük", style = TextStyle(color = accent, fontSize = 10.sp))
-                    state[statusKey]?.takeIf { it.isNotBlank() }?.let {
-                        Text(it, style = TextStyle(color = foreground, fontSize = 10.sp))
+                    Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
+                        style = TextStyle(color = accent, fontSize = 10.sp), maxLines = 1)
+                    Spacer(GlanceModifier.height(4.dp))
+                    listOf(
+                        listOf("7", "8", "9", "÷", "C"),
+                        listOf("4", "5", "6", "×", "⌫"),
+                        listOf("1", "2", "3", "−", "↻"),
+                        listOf("0", "00", ",", "+", "=")
+                    ).forEach { row ->
+                        Row(GlanceModifier.fillMaxWidth().height(44.dp)) {
+                            row.forEachIndexed { column, key ->
+                                WidgetKey(key, GlanceModifier.defaultWeight().fillMaxHeight(),
+                                    if (key == "↻") actionRunCallback<RefreshAction>() else calculatorAction(key), column >= 3)
+                            }
+                        }
                     }
-                }
-                Row(GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
-                    Text("Yenile ↻", modifier = GlanceModifier.padding(10.dp).clickable(actionRunCallback<RefreshAction>()),
-                        style = TextStyle(color = accent, fontSize = 13.sp, fontWeight = FontWeight.Bold))
                 }
             }
         }
+    }
+}
+
+class CalculatorAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val key = parameters[keyParameter] ?: return
+        updateAppWidgetState(context, glanceId) { state ->
+            val expression = state[expressionKey] ?: "1"
+            when {
+                key == "target" -> state[choosingTargetKey] = !(state[choosingTargetKey] ?: false)
+                key.startsWith("target:") -> {
+                    val code = key.removePrefix("target:")
+                    if (code in currencyNames) state[targetKey] = code
+                    state[choosingTargetKey] = false
+                }
+                key == "=" -> {
+                    runCatching { WidgetCalculator.evaluate(expression) }.getOrNull()?.let {
+                        state[expressionKey] = WidgetCalculator.input(it)
+                        state[evaluatedKey] = true
+                    }
+                }
+                else -> {
+                    val fresh = (state[evaluatedKey] ?: true) && (key.firstOrNull()?.isDigit() == true || key == ",")
+                    state[expressionKey] = WidgetCalculator.edit(if (fresh) "0" else expression, key)
+                    state[evaluatedKey] = false
+                    state[choosingTargetKey] = false
+                }
+            }
+        }
+        RatesWidget().update(context, glanceId)
     }
 }
 
