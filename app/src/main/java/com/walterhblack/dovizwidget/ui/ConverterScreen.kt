@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -30,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.walterhblack.dovizwidget.data.CurrencyMath
@@ -41,6 +43,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 // @Composable: Bu fonksiyon veriden bir ekran parçası üretir; veri değişince ekran yenilenir.
 @Composable
@@ -164,7 +167,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                   KeyboardMode.Collapsed -> collapsedHeightPx
                   KeyboardMode.Docked -> dockedHeightPx
               }
-              var keyboardHeightPx by remember(density) { mutableFloatStateOf(targetKeyboardHeightPx) }
+              var keyboardHeightPx by remember(density, uiScale) { mutableFloatStateOf(targetKeyboardHeightPx) }
               var isKeyboardDragging by remember { mutableStateOf(false) }
               LaunchedEffect(targetKeyboardHeightPx, isKeyboardDragging) {
                   if (isKeyboardDragging) return@LaunchedEffect
@@ -176,12 +179,19 @@ fun ConverterScreen(model: ConverterViewModel) {
                       keyboardHeightPx = height
                   }
               }
-              val currentKeyboardHeightPx = keyboardHeightPx.coerceIn(collapsedHeightPx, dockedHeightPx)
-              val currentKeyboardHeight = with(density) { currentKeyboardHeightPx.toDp() }
-              Box(Modifier.fillMaxSize()) {
+              Box(Modifier.fillMaxSize().clipToBounds()) {
                 Column(
                   Modifier.fillMaxSize()
-                    .padding(bottom = currentKeyboardHeight)
+                    .layout { measurable, constraints ->
+                        val visibleHeight = (constraints.maxHeight - keyboardHeightPx.roundToInt())
+                            .coerceAtLeast(0)
+                        val placeable = measurable.measure(
+                            constraints.copy(minHeight = 0, maxHeight = visibleHeight)
+                        )
+                        layout(constraints.maxWidth, constraints.maxHeight) {
+                            placeable.place(0, 0)
+                        }
+                    }
                 ) {
                   Column(
                   Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -363,13 +373,17 @@ fun ConverterScreen(model: ConverterViewModel) {
                         keyboardMode = if (keyboardMode == KeyboardMode.Docked) KeyboardMode.Collapsed else KeyboardMode.Docked
                     },
                     uiScale = uiScale,
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(currentKeyboardHeight),
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(304.dp * uiScale)
+                        .offset {
+                            IntOffset(0, (dockedHeightPx - keyboardHeightPx).roundToInt())
+                        },
                     minHeightPx = collapsedHeightPx,
                     dockedHeightPx = dockedHeightPx,
-                    currentHeightPx = currentKeyboardHeightPx,
                     onDragStart = {
                         isKeyboardDragging = true
-                        currentKeyboardHeightPx
+                        keyboardHeightPx
                     },
                     onDragHeightChange = { keyboardHeightPx = it },
                     onDragFinish = { mode, height ->
@@ -398,7 +412,6 @@ private fun CurrencyKeyboard(
     modifier: Modifier = Modifier,
     minHeightPx: Float,
     dockedHeightPx: Float,
-    currentHeightPx: Float,
     onDragStart: () -> Float,
     onDragHeightChange: (Float) -> Unit,
     onDragFinish: (KeyboardMode, Float) -> Unit
@@ -505,18 +518,15 @@ private fun CurrencyKeyboard(
             )
         }
         HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
-        // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
+        // Izgara sabit boyda kalır; panel ekrandan aşağı kayarak kapanır.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
-            val closedFraction = ((dockedHeightPx - currentHeightPx) /
-                (dockedHeightPx - minHeightPx).coerceAtLeast(1f)).coerceIn(0f, 1f)
-            val gridOffset = 40.dp * closedFraction * uiScale
             val rows = listOf(
                 listOf("7", "8", "9", "÷", "C"),
                 listOf("4", "5", "6", "×", "⌫"),
                 listOf("1", "2", "3", "−", "↻"),
                 listOf("0", "00", ",", "+", "=")
             )
-            Column(Modifier.fillMaxWidth().offset(y = gridOffset).height(272.dp * uiScale)) {
+            Column(Modifier.fillMaxWidth().height(272.dp * uiScale)) {
                 rows.forEach { row ->
                     Row(Modifier.fillMaxWidth().weight(1f)) {
                         row.forEach { key ->

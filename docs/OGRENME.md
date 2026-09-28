@@ -23,9 +23,9 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 
 Tutar klavyesi kaydırılabilir ekran Column'unun dışında durur; bu yüzden kur listesini kaydırırken altta sabit kalır. Normal konumunda widget'taki beş sütunlu düzenle sayılar, `00`, virgül, C, silme, eşittir, kur yenileme ve dört işlem tuşları birlikte görünür. İşlem tuşları widget ile aynı yeşili kullanır. Tuşların siyah kenarlıkları çizimdeki ızgara çizgilerini oluşturur. Panel iki kenara kadar uzanır.
 
-Üst ortadaki yeşil çizgi tutma yeridir: basılı tutup sürükleyince klavye parmağı takip eder, bırakınca kapalı veya normal konumdan en yakınına yumuşakça oturur. Tam ekran büyütme yoktur. Tek başına dokunmak klavyeyi hareket ettirmez. Geçişte panel yalnızca kayarak boyut değiştirir; ekran ve tuşlar soluklaşmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu iki görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
+Üst ortadaki yeşil çizgi tutma yeridir: sürükleyince klavye parmağı takip eder, bırakınca kapalı veya normal konumdan en yakınına yumuşakça oturur. Çizgiye dokunmak da klavyeyi açıp kapatır. Tam ekran büyütme yoktur. Geçişte sabit boylu panel ekrandan aşağı kayar; tuşlar soluklaşmaz veya sıkışmaz. Normal durumda sonuçları kaydırırken klavye yerinden oynamaz. `KeyboardMode` bu iki görünüm durumunu tutar; bu bilgi ekran yeniden oluşturulunca `rememberSaveable` ile korunur.
 
-Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur; kapanışta sıkışmak yerine panelin altına kayar. Sürükleme ve bırakma animasyonu aynı yükseklik değerini kullanır; böylece bırakırken eski konuma dönülmez.
+Tuş ızgarası açılıp kapanırken 272 dp yüksekliğini korur. Animasyon yalnızca panelin konumunu ve üstteki kaydırılabilir alanın ölçüsünü değiştirir; her karede bütün kur satırlarını yeniden çizmek gerekmez. Sürükleme ve bırakma animasyonu aynı yükseklik değerini kullanır; böylece bırakırken eski konuma dönülmez.
 
 Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar aralıksız tek bir liste halinde birleşir. Yazılan tutarın seçili para birimindeki değeri aynı satırda, diğer para birimlerine çevrilmiş değerleri diğer satırlarda görünür. Para birimi okları satırların yerini değiştirebilir; yıldızlar widget favorilerini günceller. Tutar yazarken yeni internet isteği yapmayız. Kur tablosunu bir kez alıp hesaplamayı telefonda yaparız.
 
@@ -46,7 +46,7 @@ fun double(x: Int) = x * 2 // fun: bir işlem tanımlar
 val result: String? = null // ?: değer henüz olmayabilir
 ```
 
-`rememberSaveable`, ekrandaki tutarı ve seçimleri ekran yeniden oluşturulduğunda geri getirir.
+`rememberSaveable`, örneğin klavyenin açık veya kapalı durumunu ekran yeniden oluşturulduğunda geri getirir. Tutar her yeni açılışta `0,00` başlar; son kaynak kuru `RateRepository` telefonda saklar.
 `mutableStateOf`, Compose'a "bu değer değişince ilgili ekranı yenile" der.
 `suspend`, internet gibi bekleyen işleri arayüzü kilitlemeden yürütmemize olanak verir. Bu projede bağlantı ayrıca `Dispatchers.IO` üzerinde çalışır.
 
