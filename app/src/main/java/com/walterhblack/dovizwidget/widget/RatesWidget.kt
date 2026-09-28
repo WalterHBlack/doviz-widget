@@ -46,6 +46,21 @@ private val utilityKey = Color(0xFF25463A)
 private val equalsKey = Color(0xFF357C5B)
 private val keyDivider = Color(0xFF101512)
 
+// Aynı kur verisi her tuşta değişmez; tekrar tekrar JSON çözümlemeyelim.
+private object WidgetSnapshotCache {
+    private var raw: String? = null
+    private var snapshot: RateSnapshot? = null
+
+    @Synchronized
+    fun get(value: String): RateSnapshot? {
+        if (raw != value) {
+            snapshot = runCatching { RateSnapshot.decode(value) }.getOrNull()
+            raw = value
+        }
+        return snapshot
+    }
+}
+
 private fun calculatorAction(key: String): Action = actionRunCallback<CalculatorAction>(
     actionParametersOf(keyParameter to key))
 
@@ -71,11 +86,11 @@ class RatesWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repository = RateRepository(context)
-        val initialSnapshot = repository.cached()
-        val initialFavorites = repository.favorites()
+        val initialSnapshot by lazy(LazyThreadSafetyMode.NONE) { repository.cached() }
+        val initialFavorites by lazy(LazyThreadSafetyMode.NONE) { repository.favorites() }
         provideContent {
             val state = currentState<Preferences>()
-            val snapshot = state[snapshotKey]?.let { runCatching { RateSnapshot.decode(it) }.getOrNull() } ?: initialSnapshot
+            val snapshot = state[snapshotKey]?.let { WidgetSnapshotCache.get(it) } ?: initialSnapshot
             val favorites = state[favoritesKey]?.split(',')?.filter { it.isNotBlank() }?.toSet() ?: initialFavorites
             val expression = state[expressionKey] ?: "1"
             val target = state[targetKey]?.takeIf { it in currencyNames } ?: "TRY"

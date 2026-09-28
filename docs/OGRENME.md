@@ -31,6 +31,8 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
+Widget'ta her tuş Glance üzerinden görünümü yeniden oluşturur. Günlük kur verisi tuşlar arasında değişmediği için aynı JSON tekrar çözümlenmez; widget durumunda kur varsa ayrıca eski yerel kayıt okunmaz. Bu, gereksiz işi azaltır; Android'in widget'ı yeniden çizme süresi yine hissedilebilir.
+
 Glance `Row` ve `Column` en fazla 10 doğrudan çocuk destekler. Başlık, tutar, liste, boşluklar ve dört klavye satırı aynı köke eklenince son satır bu sınırı aşıyordu. Dört satır artık tek bir klavye `Column` içinde; yüksekliği dört satırın toplamıdır. Bu sorunu yalnızca yazıları veya tuşları küçültmek çözmez.
 
 Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Görsel ölçek genişlik için 300 dp, yükseklik için 460 dp tabanından hesaplanır; dört klavye satırının korunması ise tek bir grupta yer almalarıyla sağlanır. Hedef seçimi on birimi tek satıra sıkıştırmak yerine beşerli iki satır gösterir.
