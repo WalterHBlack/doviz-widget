@@ -20,6 +20,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -120,7 +122,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                 )
             }
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
-              val collapsedHeightPx = with(density) { 72.dp.toPx() * uiScale }
+              val collapsedHeightPx = with(density) { 34.dp.toPx() * uiScale }
               val dockedHeightPx = with(density) { 304.dp.toPx() * uiScale }
               val targetKeyboardHeightPx = when (keyboardMode) {
                   KeyboardMode.Collapsed -> collapsedHeightPx
@@ -333,8 +335,8 @@ private fun CurrencyKeyboard(
 
     Column(modifier.fillMaxWidth().clipToBounds().background(colors.surfaceContainerHighest)) {
         Box(
-            Modifier.fillMaxWidth().height(32.dp * uiScale)
-                .border(width = 1.dp, color = colors.outline)
+            Modifier.fillMaxWidth().height(28.dp * uiScale)
+                .background(colors.surfaceContainerHighest)
                 .pointerInput(minHeightPx, dockedHeightPx) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -389,7 +391,12 @@ private fun CurrencyKeyboard(
                 .semantics { contentDescription = "Klavyeyi aç veya kapat; sürükleyerek de taşı" },
             contentAlignment = Alignment.Center
         ) {
-            Box(Modifier.width(48.dp * uiScale).height(6.dp * uiScale).background(colors.primary))
+            Box(
+                Modifier.width(40.dp * uiScale)
+                    .height(4.dp * uiScale)
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(colors.primary.copy(alpha = 0.88f))
+            )
         }
         // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
