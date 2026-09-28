@@ -82,9 +82,11 @@ class RatesWidget : GlanceAppWidget() {
             val calculation = runCatching { WidgetCalculator.evaluate(expression) }
             val amount = calculation.getOrNull()
             val size = LocalSize.current
-            val widthScale = (size.width.value / 300f).coerceIn(0.82f, 1.65f)
-            val heightScale = (size.height.value / 560f).coerceIn(0.82f, 1.65f)
-            val scale = min(widthScale, heightScale)
+            // Bazı launcher'lar XML'deki minimum yüksekliği daha küçük bir alana sıkıştırır.
+            // Ölçeği gerçek yüksekliğe göre düşürerek son klavye satırını dışarı taşırmayız.
+            val widthScale = size.width.value / 300f
+            val heightScale = size.height.value / 460f
+            val scale = min(widthScale, heightScale).coerceIn(0.58f, 1.65f)
             // Dört klavye satırı, 220x320 dp'lik minimum widget'ta da tamamen görünür.
             val keyHeight = 36.dp * scale
             val sectionGap = 4.dp * scale
