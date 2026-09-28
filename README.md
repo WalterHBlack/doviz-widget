@@ -4,9 +4,9 @@ Kotlin ile Android döviz çevirici ve ana ekran widget'ı. Android 8.0 ve üzer
 
 ## Özellikler
 
-- 30 para birimi arasında çeviri; virgül veya noktayla ondalık giriş ve dört işlem.
+- 29 para birimi arasında çeviri; virgül veya noktayla ondalık giriş ve dört işlem.
 - Kod ve isimle arama, bayraklı seçim listesi ve favori filtresi.
-- Kalıcı favoriler; widget'ta seçilen hedef birimde karşılıklar ve sayfalar arasında geçiş.
+- Ayrı ana sayfa ve widget favorileri; başlangıçta USD, EUR, TRY, GBP. Widget en fazla dört favori gösterir.
 - Önizlemeli ayarlar: sistem, açık ve koyu tema; küçük, normal ve büyük arayüz.
 - Son başarılı kur kaydını çevrimdışı kullanma; kaynak tarihi ve alınma zamanı.
 - Widget'tan çeviriciyi açma ve elle yenileme; sayı girişinde kısmi güncelleme.

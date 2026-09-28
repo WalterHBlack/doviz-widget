@@ -28,7 +28,6 @@ class RateSnapshotTest {
         "MYR" to "2.5",
         "PHP" to "2.5",
         "RON" to "2.5",
-        "ILS" to "2.5",
         "ISK" to "2.5",
     )
     private val valid = org.json.JSONArray().apply {

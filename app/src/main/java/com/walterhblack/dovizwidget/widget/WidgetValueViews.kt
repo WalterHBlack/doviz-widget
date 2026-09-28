@@ -77,8 +77,6 @@ private val valueRows = listOf(
         R.id.widget_value_php, R.id.widget_target_php),
     ValueRow("RON", R.id.widget_row_ron, R.id.widget_content_ron, R.id.widget_code_ron,
         R.id.widget_value_ron, R.id.widget_target_ron),
-    ValueRow("ILS", R.id.widget_row_ils, R.id.widget_content_ils, R.id.widget_code_ils,
-        R.id.widget_value_ils, R.id.widget_target_ils),
     ValueRow("ISK", R.id.widget_row_isk, R.id.widget_content_isk, R.id.widget_code_isk,
         R.id.widget_value_isk, R.id.widget_target_isk),
 )

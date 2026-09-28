@@ -65,8 +65,17 @@ data class RateSnapshot(val date: String, val fetchedAt: Long, val rates: Map<St
 class RateRepository(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences("rates", Context.MODE_PRIVATE)
     fun cached(): RateSnapshot? = prefs.getString("snapshot", null)?.let { runCatching { RateSnapshot.decode(it) }.getOrNull() }
-    fun favorites(): Set<String> = prefs.getStringSet("favorites", setOf("USD", "EUR"))!!.toSet()
-    fun setFavorites(codes: Set<String>) { prefs.edit().putStringSet("favorites", codes).apply() }
+    fun favorites(): Set<String> = prefs.getStringSet("favorites", setOf("USD", "EUR", "TRY", "GBP"))!!
+        .filter { it in currencyNames }.take(4).toSet()
+    fun setFavorites(codes: Set<String>) {
+        prefs.edit().putStringSet("favorites", codes.filter { it in currencyNames }.take(4).toSet()).apply()
+    }
+    fun homeFavorites(): List<String> = prefs.getString("home_favorites", "USD,EUR,TRY,GBP")!!
+        .split(',').filter { it in currencyNames }.distinct().ifEmpty { listOf("USD", "EUR", "TRY", "GBP") }
+    fun setHomeFavorites(codes: List<String>) {
+        val selected = codes.filter { it in currencyNames }.distinct()
+        if (selected.isNotEmpty()) prefs.edit().putString("home_favorites", selected.joinToString(",")).apply()
+    }
     fun theme(): String = prefs.getString("theme", "system")!!
     fun setTheme(value: String) { prefs.edit().putString("theme", value).apply() }
     fun uiScale(): String = prefs.getString("ui_scale", "normal")!!

@@ -1124,46 +1124,6 @@
             android:background="#2B3C32" />
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/widget_row_ils"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_ils"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_ils"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="ILS"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_ils"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_ils"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
         android:id="@+id/widget_row_isk"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

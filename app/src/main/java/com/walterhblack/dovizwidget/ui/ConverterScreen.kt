@@ -89,8 +89,8 @@ fun ConverterScreen(model: ConverterViewModel) {
     ) {
         Surface(Modifier.fillMaxSize()) {
             var amount by remember { mutableStateOf("0,00") }
-            var from by rememberSaveable { mutableStateOf(model.sourceCurrency) }
-            var rowCodes by rememberSaveable { mutableStateOf(currencyNames.keys.toList()) }
+            val from = model.sourceCurrency
+            val rowCodes = model.homeFavorites
             var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
             val calculation = runCatching { WidgetCalculator.evaluate(amount) }
             val parsed = calculation.getOrNull()
@@ -110,23 +110,13 @@ fun ConverterScreen(model: ConverterViewModel) {
             }
             if (manageCurrencies || pickingCode != null) {
                 CurrencySelectionSheet(
-                    favorites = model.favorites,
+                    favorites = model.homeFavorites.toSet(),
+                    widgetFavorites = model.favorites,
+                    onWidgetFavorite = model::toggleFavorite,
                     selected = pickingCode,
-                    onFavorite = model::toggleFavorite,
+                    onFavorite = model::toggleHomeFavorite,
                     onSelect = if (manageCurrencies) null else { newCode ->
-                        val oldCode = pickingCode
-                        val index = rowCodes.indexOf(oldCode)
-                        if (index >= 0) {
-                            val previousIndex = rowCodes.indexOf(newCode)
-                            rowCodes = rowCodes.toMutableList().apply {
-                                this[index] = newCode
-                                if (previousIndex >= 0) this[previousIndex] = oldCode!!
-                            }
-                            if (from == oldCode) {
-                                from = newCode
-                                model.setSelectedSourceCurrency(newCode)
-                            }
-                        }
+                        pickingCode?.let { model.replaceHomeCurrency(it, newCode) }
                         pickingCode = null
                     },
                     onDismiss = { manageCurrencies = false; pickingCode = null }
@@ -212,34 +202,12 @@ fun ConverterScreen(model: ConverterViewModel) {
                   }
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                   model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
+                  calculationError?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
-                  Surface(
-                      modifier = Modifier.fillMaxWidth(),
-                      shape = MaterialTheme.shapes.medium,
-                      color = colors.surfaceContainer,
-                      tonalElevation = 1.dp
-                  ) {
-                      Row(
-                          Modifier.padding(horizontal = 18.dp * uiScale, vertical = 13.dp * uiScale),
-                          verticalAlignment = Alignment.CenterVertically
-                      ) {
-                          Column(Modifier.weight(1f)) {
-                              Text("HESAPLANAN TUTAR", style = MaterialTheme.typography.labelSmall,
-                                  color = colors.primary, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
-                              Text(amount, style = MaterialTheme.typography.titleLarge,
-                                  color = colors.onSurface, maxLines = 1)
-                              if (calculationError != null) {
-                                  Text(calculationError, color = colors.error,
-                                      style = MaterialTheme.typography.bodySmall)
-                              }
-                          }
-                          Text(from, color = colors.onSurfaceVariant, style = MaterialTheme.typography.titleMedium)
-                      }
-                  }
                   Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                       Text("Para birimleri", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
                           color = colors.onSurfaceVariant)
-                      Text("${currencyNames.size} birim", style = MaterialTheme.typography.labelMedium, color = colors.primary)
+                      Text("${rowCodes.size} favori", style = MaterialTheme.typography.labelMedium, color = colors.primary)
                   }
                   Column(
                       Modifier.fillMaxWidth()
@@ -261,7 +229,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                           Modifier.fillMaxWidth()
                               .background(if (isSource) selectedRowColor else listSurfaceColor)
                               .clickable {
-                                  from = code
                                   model.setSelectedSourceCurrency(code)
                               }
                               .padding(horizontal = 12.dp * uiScale, vertical = 14.dp * uiScale),
@@ -295,11 +262,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                           )
                       }
                   }
-                  }
-                  OutlinedButton(onClick = { manageCurrencies = true },
-                      modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp * uiScale),
-                      shape = MaterialTheme.shapes.medium) {
-                      Text("★   Widget favorilerini yönet", fontSize = (16.sp.value * uiScale).sp)
                   }
                   Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)

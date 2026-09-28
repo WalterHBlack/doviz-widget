@@ -61,7 +61,6 @@ internal fun CurrencyFlag(code: String, modifier: Modifier = Modifier) {
         "MYR" -> R.drawable.flag_my
         "PHP" -> R.drawable.flag_ph
         "RON" -> R.drawable.flag_ro
-        "ILS" -> R.drawable.flag_il
         "ISK" -> R.drawable.flag_is
         else -> R.drawable.ic_currency
     }
@@ -77,6 +76,8 @@ private fun searchKey(value: String): String =
 @Composable
 internal fun CurrencySelectionSheet(
     favorites: Set<String>,
+    widgetFavorites: Set<String>,
+    onWidgetFavorite: (String) -> Unit,
     selected: String?,
     onFavorite: (String) -> Unit,
     onSelect: ((String) -> Unit)?,
@@ -84,18 +85,29 @@ internal fun CurrencySelectionSheet(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var onlyFavorites by rememberSaveable { mutableStateOf(false) }
-    val visible = remember(query, onlyFavorites, favorites) {
+    var widgetTab by rememberSaveable { mutableStateOf(false) }
+    val managing = onSelect == null
+    val activeFavorites = if (managing && widgetTab) widgetFavorites else favorites
+    val toggleFavorite = if (managing && widgetTab) onWidgetFavorite else onFavorite
+    val visible = remember(query, onlyFavorites, activeFavorites) {
         val search = searchKey(query.trim())
         currencyNames.entries.filter { (code, name) ->
-            (!onlyFavorites || code in favorites) &&
+            (!onlyFavorites || code in activeFavorites) &&
                 (search.isEmpty() || searchKey("$code $name").contains(search))
         }
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.9f).imePadding().padding(horizontal = 20.dp)) {
-            Text(if (onSelect == null) "Widget favorileri" else "Para birimi seç",
+            Text(if (managing) "Favoriler" else "Para birimi seç",
                 style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-            Text(if (onSelect == null) "Yıldızladığın para birimleri ana ekran widget’ında görünür."
+            if (managing) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(!widgetTab, { widgetTab = false; onlyFavorites = false }, label = { Text("Ana sayfa") })
+                    FilterChip(widgetTab, { widgetTab = true; onlyFavorites = false }, label = { Text("Widget · ${widgetFavorites.size}/4") })
+                }
+            }
+            Text(if (managing && widgetTab) "Widget için en fazla 4 para birimi seç. Değiştirmek için önce bir yıldızı kaldır."
+                else if (managing) "Ana sayfada görmek istediğin para birimlerini seç. En az bir birim seçili kalır."
                 else "İsme veya koda göre bul, satıra dokunarak seç.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp, bottom = 16.dp))
@@ -105,7 +117,7 @@ internal fun CurrencySelectionSheet(
                 trailingIcon = if (query.isNotEmpty()) { { TextButton(onClick = { query = "" }) { Text("Sil") } } } else null)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 10.dp)) {
                 FilterChip(!onlyFavorites, { onlyFavorites = false }, label = { Text("Tümü · ${currencyNames.size}") })
-                FilterChip(onlyFavorites, { onlyFavorites = true }, label = { Text("Favoriler · ${favorites.size}") })
+                FilterChip(onlyFavorites, { onlyFavorites = true }, label = { Text("Seçili · ${activeFavorites.size}") })
             }
             if (visible.isEmpty()) {
                 Text(if (onlyFavorites && query.isBlank()) "Henüz favori seçmedin. Tümü sekmesinden yıldız ekleyebilirsin."
@@ -114,10 +126,12 @@ internal fun CurrencySelectionSheet(
             }
             LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 24.dp)) {
                 items(visible, key = { it.key }) { (code, name) ->
+                    val canToggle = if (managing && widgetTab) code in activeFavorites || activeFavorites.size < 4
+                        else code !in activeFavorites || activeFavorites.size > 1
                     Surface(color = if (selected == code) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                         else MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp)) {
-                        Row(Modifier.fillMaxWidth().clickable {
-                            if (onSelect == null) onFavorite(code) else onSelect(code)
+                        Row(Modifier.fillMaxWidth().clickable(enabled = !managing || canToggle) {
+                            if (onSelect == null) toggleFavorite(code) else onSelect(code)
                         }.padding(start = 12.dp, top = 10.dp, bottom = 10.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             CurrencyFlag(code, Modifier.size(44.dp, 32.dp))
@@ -128,11 +142,11 @@ internal fun CurrencySelectionSheet(
                                     overflow = TextOverflow.Ellipsis)
                             }
                             if (selected == code) Text("✓", color = MaterialTheme.colorScheme.primary)
-                            IconButton(onClick = { onFavorite(code) }) {
-                                Text(if (code in favorites) "★" else "☆", fontSize = 26.sp,
-                                    color = MaterialTheme.colorScheme.primary,
+                            IconButton(onClick = { toggleFavorite(code) }, enabled = canToggle) {
+                                Text(if (code in activeFavorites) "★" else "☆", fontSize = 26.sp,
+                                    color = if (canToggle) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                                     modifier = Modifier.semantics {
-                                        contentDescription = if (code in favorites) "$code favorilerden çıkar" else "$code favorilere ekle"
+                                        contentDescription = if (code in activeFavorites) "$code favorilerden çıkar" else "$code favorilere ekle"
                                     })
                             }
                         }
@@ -181,7 +195,7 @@ internal fun SettingsScreen(model: ConverterViewModel, onFavorites: () -> Unit, 
                             }
                         }
                     }
-                    SettingsSection("Widget favorileri", "${model.favorites.size} para birimi seçili. Ana ekranda görmek istediklerini düzenle.") {
+                    SettingsSection("Favoriler", "Ana sayfa: ${model.homeFavorites.size} birim · Widget: ${model.favorites.size}/4") {
                         OutlinedButton(onClick = onFavorites, modifier = Modifier.fillMaxWidth()) { Text("Favorileri düzenle") }
                     }
                     SettingsSection("Kur verileri", "Frankfurter / Avrupa Merkez Bankası günlük referans kurları. Banka alış ve satış fiyatları değildir.") {

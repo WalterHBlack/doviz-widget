@@ -1,5 +1,7 @@
 # Working agreement
 
+- User preference: do not add ILS (Israeli shekel) to the supported currencies. Home favorites and widget favorites are separate; widget favorites are limited to four.
+
 - Before each change round, commit and push the current safe project state to GitHub. Verify the remote commit before editing. Do not proceed when the backup fails.
 - Never commit credentials, local SDK paths, private signing keys, or build outputs.
 - Explain meaningful changes in simple Turkish, including which file owns the behavior. Keep learning notes in `docs/OGRENME.md` aligned with the code.

@@ -58,6 +58,5 @@ val currencyNames = linkedMapOf(
     "MYR" to "Malezya ringgiti",
     "PHP" to "Filipin pesosu",
     "RON" to "Rumen leyi",
-    "ILS" to "İsrail şekeli",
     "ISK" to "İzlanda kronu",
 )

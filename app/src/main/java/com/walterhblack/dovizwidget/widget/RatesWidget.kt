@@ -102,7 +102,7 @@ class RatesWidget : GlanceAppWidget() {
             val state = currentState<Preferences>()
             val inputState = calculatorStates[id] ?: state
             val snapshot = state[snapshotKey]?.let { WidgetSnapshotCache.get(it) } ?: initialSnapshot
-            val favorites = state[favoritesKey]?.split(',')?.filter { it.isNotBlank() }?.toSet() ?: initialFavorites
+            val favorites = state[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet() ?: initialFavorites
             val expression = inputState[expressionKey] ?: "1"
             val target = inputState[targetKey]?.takeIf { it in currencyNames } ?: "TRY"
             val size = LocalSize.current
