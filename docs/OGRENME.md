@@ -31,7 +31,9 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
-Widget'ta her tuş Glance üzerinden görünümü yeniden oluşturur. Günlük kur verisi tuşlar arasında değişmediği için aynı JSON tekrar çözümlenmez; widget durumunda kur varsa ayrıca eski yerel kayıt okunmaz. Bu, gereksiz işi azaltır; Android'in widget'ı yeniden çizme süresi yine hissedilebilir.
+Sayı, silme ve matematik tuşları artık bütün Glance görünümünü yeniden oluşturmadan `partiallyUpdateAppWidget` ile yalnızca tutarı, sonuçları ve hesaplama mesajını günceller. `widget/WidgetValueViews.kt` bu metin güncellemelerini yönetir; `res/layout/widget_expression.xml` ve `widget_values.xml` alanların sabit kimliklerini taşır. Hedef menüsü, boyut veya kur/favori değişimi tam görünüm güncellemesi kullanır. Eski sürümün widget düğmesinden gelen ilk basış da yeni alanları kurmak için tam güncellenir. Bu yaklaşım Android'in [kısmi widget güncelleme](https://developer.android.com/develop/ui/views/appwidgets/advanced) desteğini kullanır.
+
+Hızlı basışlar sırayla işlenir; her widget'ın girdisi DataStore'a kaydedilir. Açık Glance oturumu boyut değiştirirse eski sayıyı göstermemesi için son girdi oturumda da tutulur. Günlük kur verisi değişmedikçe aynı JSON tekrar çözümlenmez. Performans farkı cihazda ölçülmeden sayısal bir hızlanma iddia edilmez.
 
 Glance `Row` ve `Column` en fazla 10 doğrudan çocuk destekler. Başlık, tutar, liste, boşluklar ve dört klavye satırı aynı köke eklenince son satır bu sınırı aşıyordu. Dört satır artık tek bir klavye `Column` içinde; yüksekliği dört satırın toplamıdır. Bu sorunu yalnızca yazıları veya tuşları küçültmek çözmez.
 
@@ -91,4 +93,4 @@ GitHub'a başlangıç durumunu kaydettikten sonra:
 2. Aynı dosyadaki `Color(0xFFA5F3CF)` değerini değiştir; koyu temanın vurgu rengini gözle.
 3. `CurrencyMathTest.kt` içine 0 USD → TRY sonucunun 0 olduğunu kontrol eden bir test ekle.
 
-Yeni para birimi eklemek yalnızca menüye bir satır koymak değildir: servis isteği, doğrulama ve widget listesi de birlikte güncellenmelidir.
+Yeni para birimi eklemek yalnızca menüye bir satır koymak değildir: servis isteği, doğrulama, `WidgetValueViews.kt` satır eşlemesi ve `widget_values.xml` de birlikte güncellenmelidir.
