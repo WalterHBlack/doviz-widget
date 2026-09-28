@@ -2,14 +2,14 @@
 
 Kotlin ile Android döviz çevirici ve ana ekran widget'ı. Android 8.0 ve üzeri.
 
-## İlk sürüm
+## Özellikler
 
-- TRY, USD, EUR ve GBP arasında çeviri; virgül veya noktayla ondalık giriş.
-- Tek dokunuşla para birimlerini değiştirme.
-- Kalıcı favoriler; widget'ta favorilerin TL karşılığı.
-- Sistem, açık ve koyu tema.
+- 30 para birimi arasında çeviri; virgül veya noktayla ondalık giriş ve dört işlem.
+- Kod ve isimle arama, bayraklı seçim listesi ve favori filtresi.
+- Kalıcı favoriler; widget'ta seçilen hedef birimde karşılıklar ve sayfalar arasında geçiş.
+- Önizlemeli ayarlar: sistem, açık ve koyu tema; küçük, normal ve büyük arayüz.
 - Son başarılı kur kaydını çevrimdışı kullanma; kaynak tarihi ve alınma zamanı.
-- Widget ekleme düğmesi, widget'tan çeviriciyi açma ve elle yenileme.
+- Widget'tan çeviriciyi açma ve elle yenileme; sayı girişinde kısmi güncelleme.
 - WorkManager ile yaklaşık 6 saatte bir bağlantı uygunsa güncelleme; kesin zaman garantisi yok.
 
 Veri: [Frankfurter v2](https://frankfurter.dev/), ECB sağlayıcısı. **Günlük referans kurlarıdır; anlık banka alış/satış fiyatları değildir.** API anahtarı gerekmez. Hafta sonu ve tatillerde son yayımlanan iş günü kuru kullanılabilir.
@@ -20,7 +20,7 @@ Veri: [Frankfurter v2](https://frankfurter.dev/), ECB sağlayıcısı. **Günlü
 
 ## Derleme
 
-Gerekenler: JDK 17 veya 21, Android SDK 35. Android Studio'da bu klasörü açabilirsin.
+Gerekenler: JDK 17 veya 21, Android SDK 36. Android Studio'da bu klasörü açabilirsin.
 SDK konumunu yerel `local.properties` dosyasında `sdk.dir=...` olarak belirt; bu dosya GitHub'a gitmez.
 
 ```powershell
@@ -29,7 +29,7 @@ SDK konumunu yerel `local.properties` dosyasında `sdk.dir=...` olarak belirt; b
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`. Bu geliştirme APK'sıdır; mağaza yayını değildir.
 Telefona aktarıp aç; Android istediğinde dosyayı açan uygulamaya kurulum izni ver.
-Widget için uygulamadaki **Widget ekle** düğmesini veya ana ekrana uzun basıp **Widget'lar → Döviz Cepte** yolunu kullan.
+Widget için ana ekrana uzun basıp **Widget'lar → Döviz Cepte** yolunu kullan.
 
 ## Geri dönüş kuralı
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,64 +102,41 @@ fun ConverterScreen(model: ConverterViewModel) {
             val listSurfaceColor = if (dark) Color(0xFF111B18) else Color.White
             var manageCurrencies by remember { mutableStateOf(false) }
             var showSettings by remember { mutableStateOf(false) }
+            var pickingCode by remember { mutableStateOf<String?>(null) }
             val uiScale = when (model.uiScale) {
                 "compact" -> 0.90f
                 "large" -> 1.10f
                 else -> 1f
             }
-            if (manageCurrencies) {
-                AlertDialog(
-                    onDismissRequest = { manageCurrencies = false },
-                    title = { Text("Widget favorilerini yönet") },
-                    text = {
-                        Column {
-                            Text("Yıldızlı kurlar widget’ta gösterilir; uygulamadaki liste değişmez.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.onSurfaceVariant)
-                            currencyNames.forEach { (code, name) ->
-                                Row(Modifier.fillMaxWidth().clickable { model.toggleFavorite(code) }
-                                    .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically) {
-                                    Text("$code · $name", modifier = Modifier.weight(1f))
-                                    Checkbox(checked = code in model.favorites,
-                                        onCheckedChange = { model.toggleFavorite(code) })
-                                }
+            if (manageCurrencies || pickingCode != null) {
+                CurrencySelectionSheet(
+                    favorites = model.favorites,
+                    selected = pickingCode,
+                    onFavorite = model::toggleFavorite,
+                    onSelect = if (manageCurrencies) null else { newCode ->
+                        val oldCode = pickingCode
+                        val index = rowCodes.indexOf(oldCode)
+                        if (index >= 0) {
+                            val previousIndex = rowCodes.indexOf(newCode)
+                            rowCodes = rowCodes.toMutableList().apply {
+                                this[index] = newCode
+                                if (previousIndex >= 0) this[previousIndex] = oldCode!!
+                            }
+                            if (from == oldCode) {
+                                from = newCode
+                                model.setSelectedSourceCurrency(newCode)
                             }
                         }
+                        pickingCode = null
                     },
-                    confirmButton = { TextButton(onClick = { manageCurrencies = false }) { Text("Tamam") } }
+                    onDismiss = { manageCurrencies = false; pickingCode = null }
                 )
             }
             if (showSettings) {
-                AlertDialog(
-                    onDismissRequest = { showSettings = false },
-                    title = { Text("Ayarlar") },
-                    text = {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Text("Tema", style = MaterialTheme.typography.titleSmall)
-                            listOf("system" to "Sistem", "light" to "Beyaz mod", "dark" to "Siyah mod").forEach { (value, label) ->
-                                Row(
-                                    Modifier.fillMaxWidth().clickable { model.setAppearance(value) },
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(selected = model.theme == value, onClick = { model.setAppearance(value) })
-                                    Text(label)
-                                }
-                            }
-                            Text("Arayüz boyutu", style = MaterialTheme.typography.titleSmall)
-                            listOf("compact" to "Küçük", "normal" to "Normal", "large" to "Büyük").forEach { (value, label) ->
-                                Row(
-                                    Modifier.fillMaxWidth().clickable { model.setInterfaceScale(value) },
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    RadioButton(selected = model.uiScale == value, onClick = { model.setInterfaceScale(value) })
-                                    Text(label)
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = { TextButton(onClick = { showSettings = false }) { Text("Tamam") } }
-                )
+                SettingsScreen(model, onFavorites = {
+                    showSettings = false
+                    manageCurrencies = true
+                }, onDismiss = { showSettings = false })
             }
             BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
               val collapsedHeightPx = with(density) { 34.dp.toPx() * uiScale }
@@ -230,108 +208,11 @@ fun ConverterScreen(model: ConverterViewModel) {
                           onClick = { showSettings = true },
                           contentPadding = PaddingValues(horizontal = 12.dp * uiScale),
                           modifier = Modifier.heightIn(min = 40.dp * uiScale)
-                      ) { Text("⚙") }
+                      ) { Text("⚙", modifier = Modifier.semantics { contentDescription = "Ayarlar" }) }
                   }
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                   model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
-                  Column(
-                      Modifier.fillMaxWidth()
-                          .clip(MaterialTheme.shapes.large)
-                          .background(listSurfaceColor)
-                          .border(1.dp, colors.outlineVariant, MaterialTheme.shapes.large)
-                  ) {
-                  rowCodes.forEachIndexed { index, code ->
-                      val isSource = code == from
-                      var menuOpen by remember(code) { mutableStateOf(false) }
-                      val converted = parsed?.let { value ->
-                          if (isSource) value else snapshot?.let {
-                              runCatching {
-                                  CurrencyMath.convert(value.abs(), from, code, it.rates)
-                                      .let { result -> if (value.signum() < 0) result.negate() else result }
-                              }.getOrNull()
-                          }
-                      }
-                      Row(
-                          Modifier.fillMaxWidth()
-                              .background(if (isSource) selectedRowColor else listSurfaceColor)
-                              .clickable {
-                                  from = code
-                                  model.setSelectedSourceCurrency(code)
-                              }
-                              .padding(horizontal = 12.dp * uiScale, vertical = 18.dp * uiScale),
-                          verticalAlignment = Alignment.CenterVertically
-                      ) {
-                              Image(
-                              painter = painterResource(
-                                  when (code) {
-                                      "TRY" -> R.drawable.flag_tr
-                                      "USD" -> R.drawable.flag_us
-                                      "EUR" -> R.drawable.flag_eu
-                                      "GBP" -> R.drawable.flag_gb
-                                      "JPY" -> R.drawable.flag_jp
-                                      "CHF" -> R.drawable.flag_ch
-                                      "CAD" -> R.drawable.flag_ca
-                                      "AUD" -> R.drawable.flag_au
-                                      "CNY" -> R.drawable.flag_cn
-                                      else -> R.drawable.flag_in
-                                  }
-                              ),
-                              contentDescription = "$code bayrağı",
-                              contentScale = ContentScale.Crop,
-                              modifier = Modifier
-                                  .size(width = 64.dp * uiScale, height = 44.dp * uiScale)
-                                  .clip(RoundedCornerShape(9.dp * uiScale))
-                          )
-                          Spacer(Modifier.width(10.dp * uiScale))
-                          Box {
-                              TextButton(onClick = { menuOpen = true }, contentPadding = PaddingValues(horizontal = 4.dp)) {
-                                  Column {
-                                  Text("$code  ▾", fontWeight = FontWeight.Medium, fontSize = (23.sp.value * uiScale).sp,
-                                          color = if (isSource) colors.primary else colors.onSurface)
-                                      if (isSource) Text("Kaynak", style = MaterialTheme.typography.labelSmall,
-                                          color = colors.primary, modifier = Modifier.padding(start = 4.dp))
-                                  }
-                              }
-                              DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                                  currencyNames.forEach { (newCode, name) ->
-                                      DropdownMenuItem(
-                                          text = { Text("$newCode · $name") },
-                                          onClick = {
-                                              val previousIndex = rowCodes.indexOf(newCode)
-                                              rowCodes = rowCodes.toMutableList().apply {
-                                                  this[index] = newCode
-                                                  this[previousIndex] = code
-                                              }
-                                              if (isSource) {
-                                                  from = newCode
-                                                  model.setSelectedSourceCurrency(newCode)
-                                              }
-                                              menuOpen = false
-                                          }
-                                      )
-                                  }
-                              }
-                          }
-                          Spacer(Modifier.weight(1f))
-                          Column(horizontalAlignment = Alignment.End) {
-                              Text(converted?.let { CurrencyMath.format(it) } ?: "—",
-                                  fontWeight = FontWeight.Normal, fontSize = (26.sp.value * uiScale).sp,
-                                  color = if (isSource) colors.primary else colors.onSurface,
-                                  maxLines = 1)
-                              Text(code, style = MaterialTheme.typography.bodySmall,
-                                  color = colors.onSurfaceVariant)
-                          }
-                      }
-                      if (index < rowCodes.lastIndex) {
-                          HorizontalDivider(
-                              modifier = Modifier.padding(start = 86.dp * uiScale),
-                              thickness = 0.7.dp,
-                              color = colors.outlineVariant.copy(alpha = 0.75f)
-                          )
-                      }
-                  }
-                  }
                   Surface(
                       modifier = Modifier.fillMaxWidth(),
                       shape = MaterialTheme.shapes.medium,
@@ -354,6 +235,66 @@ fun ConverterScreen(model: ConverterViewModel) {
                           }
                           Text(from, color = colors.onSurfaceVariant, style = MaterialTheme.typography.titleMedium)
                       }
+                  }
+                  Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                      Text("Para birimleri", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
+                          color = colors.onSurfaceVariant)
+                      Text("${currencyNames.size} birim", style = MaterialTheme.typography.labelMedium, color = colors.primary)
+                  }
+                  Column(
+                      Modifier.fillMaxWidth()
+                          .clip(MaterialTheme.shapes.large)
+                          .background(listSurfaceColor)
+                          .border(1.dp, colors.outlineVariant, MaterialTheme.shapes.large)
+                  ) {
+                  rowCodes.forEachIndexed { index, code ->
+                      val isSource = code == from
+                      val converted = parsed?.let { value ->
+                          if (isSource) value else snapshot?.let {
+                              runCatching {
+                                  CurrencyMath.convert(value.abs(), from, code, it.rates)
+                                      .let { result -> if (value.signum() < 0) result.negate() else result }
+                              }.getOrNull()
+                          }
+                      }
+                      Row(
+                          Modifier.fillMaxWidth()
+                              .background(if (isSource) selectedRowColor else listSurfaceColor)
+                              .clickable {
+                                  from = code
+                                  model.setSelectedSourceCurrency(code)
+                              }
+                              .padding(horizontal = 12.dp * uiScale, vertical = 14.dp * uiScale),
+                          verticalAlignment = Alignment.CenterVertically
+                      ) {
+                          CurrencyFlag(code, Modifier.size(48.dp * uiScale, 34.dp * uiScale))
+                          Spacer(Modifier.width(10.dp * uiScale))
+                          Column(Modifier.width(94.dp * uiScale)
+                              .clickable { pickingCode = code }.padding(vertical = 4.dp)) {
+                              Text("$code  ▾", fontWeight = FontWeight.SemiBold, fontSize = (20f * uiScale).sp,
+                                  color = if (isSource) colors.primary else colors.onSurface)
+                              Text(if (isSource) "Kaynak para birimi" else currencyNames[code].orEmpty(),
+                                  style = MaterialTheme.typography.labelSmall, maxLines = 1,
+                                  overflow = TextOverflow.Ellipsis,
+                                  color = if (isSource) colors.primary else colors.onSurfaceVariant)
+                          }
+                          Column(Modifier.weight(1f).padding(start = 8.dp), horizontalAlignment = Alignment.End) {
+                              Text(converted?.let { CurrencyMath.format(it) } ?: "—",
+                                  fontWeight = FontWeight.Normal, fontSize = (24.sp.value * uiScale).sp,
+                                  color = if (isSource) colors.primary else colors.onSurface,
+                                  maxLines = 1, overflow = TextOverflow.Ellipsis)
+                              Text(code, style = MaterialTheme.typography.bodySmall,
+                                  color = colors.onSurfaceVariant)
+                          }
+                      }
+                      if (index < rowCodes.lastIndex) {
+                          HorizontalDivider(
+                              modifier = Modifier.padding(start = 70.dp * uiScale),
+                              thickness = 0.7.dp,
+                              color = colors.outlineVariant.copy(alpha = 0.75f)
+                          )
+                      }
+                  }
                   }
                   OutlinedButton(onClick = { manageCurrencies = true },
                       modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp * uiScale),
@@ -575,19 +516,5 @@ private fun KeyboardKey(
             fontWeight = FontWeight.SemiBold,
             color = foreground
         )
-    }
-}
-
-@Composable
-private fun CurrencyPicker(label: String, code: String, onSelect: (String) -> Unit, modifier: Modifier) {
-    var expanded by remember { mutableStateOf(false) }
-    Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelMedium)
-        Box {
-            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text("$code ▾") }
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                currencyNames.forEach { (key, name) -> DropdownMenuItem(text = { Text("$key · $name") }, onClick = { onSelect(key); expanded = false }) }
-            }
-        }
     }
 }

@@ -41,6 +41,46 @@ private val valueRows = listOf(
         R.id.widget_value_cny, R.id.widget_target_cny),
     ValueRow("INR", R.id.widget_row_inr, R.id.widget_content_inr, R.id.widget_code_inr,
         R.id.widget_value_inr, R.id.widget_target_inr),
+    ValueRow("NOK", R.id.widget_row_nok, R.id.widget_content_nok, R.id.widget_code_nok,
+        R.id.widget_value_nok, R.id.widget_target_nok),
+    ValueRow("SEK", R.id.widget_row_sek, R.id.widget_content_sek, R.id.widget_code_sek,
+        R.id.widget_value_sek, R.id.widget_target_sek),
+    ValueRow("DKK", R.id.widget_row_dkk, R.id.widget_content_dkk, R.id.widget_code_dkk,
+        R.id.widget_value_dkk, R.id.widget_target_dkk),
+    ValueRow("PLN", R.id.widget_row_pln, R.id.widget_content_pln, R.id.widget_code_pln,
+        R.id.widget_value_pln, R.id.widget_target_pln),
+    ValueRow("CZK", R.id.widget_row_czk, R.id.widget_content_czk, R.id.widget_code_czk,
+        R.id.widget_value_czk, R.id.widget_target_czk),
+    ValueRow("HUF", R.id.widget_row_huf, R.id.widget_content_huf, R.id.widget_code_huf,
+        R.id.widget_value_huf, R.id.widget_target_huf),
+    ValueRow("NZD", R.id.widget_row_nzd, R.id.widget_content_nzd, R.id.widget_code_nzd,
+        R.id.widget_value_nzd, R.id.widget_target_nzd),
+    ValueRow("SGD", R.id.widget_row_sgd, R.id.widget_content_sgd, R.id.widget_code_sgd,
+        R.id.widget_value_sgd, R.id.widget_target_sgd),
+    ValueRow("HKD", R.id.widget_row_hkd, R.id.widget_content_hkd, R.id.widget_code_hkd,
+        R.id.widget_value_hkd, R.id.widget_target_hkd),
+    ValueRow("ZAR", R.id.widget_row_zar, R.id.widget_content_zar, R.id.widget_code_zar,
+        R.id.widget_value_zar, R.id.widget_target_zar),
+    ValueRow("KRW", R.id.widget_row_krw, R.id.widget_content_krw, R.id.widget_code_krw,
+        R.id.widget_value_krw, R.id.widget_target_krw),
+    ValueRow("BRL", R.id.widget_row_brl, R.id.widget_content_brl, R.id.widget_code_brl,
+        R.id.widget_value_brl, R.id.widget_target_brl),
+    ValueRow("MXN", R.id.widget_row_mxn, R.id.widget_content_mxn, R.id.widget_code_mxn,
+        R.id.widget_value_mxn, R.id.widget_target_mxn),
+    ValueRow("THB", R.id.widget_row_thb, R.id.widget_content_thb, R.id.widget_code_thb,
+        R.id.widget_value_thb, R.id.widget_target_thb),
+    ValueRow("IDR", R.id.widget_row_idr, R.id.widget_content_idr, R.id.widget_code_idr,
+        R.id.widget_value_idr, R.id.widget_target_idr),
+    ValueRow("MYR", R.id.widget_row_myr, R.id.widget_content_myr, R.id.widget_code_myr,
+        R.id.widget_value_myr, R.id.widget_target_myr),
+    ValueRow("PHP", R.id.widget_row_php, R.id.widget_content_php, R.id.widget_code_php,
+        R.id.widget_value_php, R.id.widget_target_php),
+    ValueRow("RON", R.id.widget_row_ron, R.id.widget_content_ron, R.id.widget_code_ron,
+        R.id.widget_value_ron, R.id.widget_target_ron),
+    ValueRow("ILS", R.id.widget_row_ils, R.id.widget_content_ils, R.id.widget_code_ils,
+        R.id.widget_value_ils, R.id.widget_target_ils),
+    ValueRow("ISK", R.id.widget_row_isk, R.id.widget_content_isk, R.id.widget_code_isk,
+        R.id.widget_value_isk, R.id.widget_target_isk),
 )
 
 internal fun expressionViews(context: Context, expression: String, scale: Float) =
@@ -96,8 +136,10 @@ private fun RemoteViews.applyValues(expression: String, target: String, snapshot
     valueRows.forEach { row ->
         val converted = amount?.let { value ->
             if (row.code == target) value else snapshot?.let {
-                val positive = CurrencyMath.convert(value.abs(), row.code, target, it.rates)
-                if (value.signum() < 0) positive.negate() else positive
+                runCatching {
+                    val positive = CurrencyMath.convert(value.abs(), row.code, target, it.rates)
+                    if (value.signum() < 0) positive.negate() else positive
+                }.getOrNull()
             }
         }
         setTextViewText(row.value, converted?.let { CurrencyMath.format(it) } ?: "—")

@@ -403,6 +403,806 @@
             android:layout_height="1dp"
             android:background="#2B3C32" />
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_nok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_nok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_nok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="NOK"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_nok"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_nok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_sek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_sek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_sek"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="SEK"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_sek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_sek"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_dkk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_dkk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_dkk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="DKK"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_dkk"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_dkk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_pln"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_pln"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_pln"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="PLN"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_pln"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_pln"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_czk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_czk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_czk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="CZK"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_czk"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_czk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_huf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_huf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_huf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="HUF"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_huf"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_huf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_nzd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_nzd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_nzd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="NZD"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_nzd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_nzd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_sgd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_sgd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_sgd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="SGD"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_sgd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_sgd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_hkd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_hkd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_hkd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="HKD"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_hkd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_hkd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_zar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_zar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_zar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="ZAR"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_zar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_zar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_krw"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_krw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_krw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="KRW"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_krw"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_krw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_brl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_brl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_brl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="BRL"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_brl"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_brl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_mxn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_mxn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_mxn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="MXN"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_mxn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_mxn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_thb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_thb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_thb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="THB"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_thb"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_thb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_idr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_idr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_idr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="IDR"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_idr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_idr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_myr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_myr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_myr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="MYR"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_myr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_myr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_php"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_php"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_php"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="PHP"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_php"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_php"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_ron"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_ron"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_ron"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="RON"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_ron"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_ron"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_ils"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_ils"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_ils"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="ILS"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_ils"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_ils"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_row_isk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/widget_content_isk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/widget_code_isk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="ISK"
+                android:textColor="#A5F3CF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/widget_value_isk"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#F0FFF7" />
+            <TextView
+                android:id="@+id/widget_target_isk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="#96ABA0" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2B3C32" />
+    </LinearLayout>
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"

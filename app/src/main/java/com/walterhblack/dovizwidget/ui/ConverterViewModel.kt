@@ -24,7 +24,8 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         val cachedAt = snapshot?.fetchedAt ?: 0L
-        if (cachedAt == 0L || System.currentTimeMillis() - cachedAt >= 6L.hoursMillis) refresh()
+        if (cachedAt == 0L || System.currentTimeMillis() - cachedAt >= 6L.hoursMillis ||
+            snapshot?.rates?.keys != com.walterhblack.dovizwidget.data.currencyNames.keys) refresh()
     }
 
     fun refresh() {

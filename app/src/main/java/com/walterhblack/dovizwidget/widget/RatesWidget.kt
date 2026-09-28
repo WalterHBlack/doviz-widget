@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.glance.action.Action
 import androidx.glance.action.actionParametersOf
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.*
@@ -36,6 +37,8 @@ private val expressionKey = stringPreferencesKey("calculator_expression")
 private val targetKey = stringPreferencesKey("calculator_target")
 private val choosingTargetKey = booleanPreferencesKey("choosing_target")
 private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
+private val targetPageKey = intPreferencesKey("target_page")
+private val favoritesPageKey = intPreferencesKey("favorites_page")
 private val keyParameter = ActionParameters.Key<String>("calculator_key")
 private val partialInputParameter = ActionParameters.Key<Boolean>("partial_input_v1")
 private val calculatorInputLock = Mutex()
@@ -150,8 +153,15 @@ class RatesWidget : GlanceAppWidget() {
                     GlanceModifier.fillMaxWidth().defaultWeight()
                         .padding(horizontal = 16.dp * scale, vertical = 4.dp * scale)
                 ) {
-                    if (inputState[choosingTargetKey] == true) {
-                        currencyNames.keys.toList().chunked(5).forEach { codes ->
+                    val choosingTarget = inputState[choosingTargetKey] == true
+                    val pageSize = if (choosingTarget) 10 else
+                        ((size.height.value / scale - 290f) / 40f).toInt().coerceIn(1, 8)
+                    val codes = currencyNames.keys.filter { choosingTarget || it in favorites }
+                    val pages = codes.chunked(pageSize).ifEmpty { listOf(emptyList()) }
+                    val page = (inputState[if (choosingTarget) targetPageKey else favoritesPageKey] ?: 0)
+                        .coerceIn(0, pages.lastIndex)
+                    if (choosingTarget) {
+                        pages[page].chunked(5).forEach { codes ->
                             Row(GlanceModifier.fillMaxWidth().height(40.dp * scale)) {
                                 codes.forEach { code ->
                                     Box(GlanceModifier.defaultWeight().fillMaxHeight()
@@ -162,8 +172,24 @@ class RatesWidget : GlanceAppWidget() {
                             }
                         }
                     } else {
-                        AndroidRemoteViews(valueViews(context, expression, target, snapshot, favorites, scale),
+                        AndroidRemoteViews(valueViews(context, expression, target, snapshot, pages[page].toSet(), scale),
                             modifier = GlanceModifier.fillMaxWidth())
+                    }
+                    if (pages.size > 1) {
+                        Row(GlanceModifier.fillMaxWidth().height(28.dp * scale),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Box(GlanceModifier.defaultWeight().fillMaxHeight()
+                                .clickable(calculatorAction("page:${(page - 1 + pages.size) % pages.size}")),
+                                contentAlignment = Alignment.Center) {
+                                Text("‹ Önceki", style = TextStyle(color = accent, fontSize = (12f * scale).sp))
+                            }
+                            Text("${page + 1}/${pages.size}", style = TextStyle(color = muted, fontSize = (10f * scale).sp))
+                            Box(GlanceModifier.defaultWeight().fillMaxHeight()
+                                .clickable(calculatorAction("page:${(page + 1) % pages.size}")),
+                                contentAlignment = Alignment.Center) {
+                                Text("Sonraki ›", style = TextStyle(color = accent, fontSize = (12f * scale).sp))
+                            }
+                        }
                     }
                 }
                 Spacer(GlanceModifier.height(sectionGap))
@@ -204,6 +230,10 @@ class CalculatorAction : ActionCallback {
                 wasChoosingTarget = state[choosingTargetKey] == true
                 val expression = state[expressionKey] ?: "1"
                 when {
+                    key.startsWith("page:") -> {
+                        val pageKey = if (wasChoosingTarget) targetPageKey else favoritesPageKey
+                        state[pageKey] = key.removePrefix("page:").toIntOrNull()?.coerceAtLeast(0) ?: 0
+                    }
                     key == "target" -> state[choosingTargetKey] = !(state[choosingTargetKey] ?: false)
                     key.startsWith("target:") -> {
                         val code = key.removePrefix("target:")
@@ -229,7 +259,7 @@ class CalculatorAction : ActionCallback {
             // Eski APK'nın düğmeleri yeni XML kimliklerini içermez: ilk basışta tam
             // güncelleme yapılır. Hedef menüsü de görünüm yapısını değiştirdiğinden tamdır.
             if (parameters[partialInputParameter] == true && !wasChoosingTarget &&
-                !key.startsWith("target") && glanceId is AppWidgetId) {
+                !key.startsWith("target") && !key.startsWith("page:") && glanceId is AppWidgetId) {
                 val snapshot = updatedState[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
                     ?: RateRepository(context).cached()
                 try {

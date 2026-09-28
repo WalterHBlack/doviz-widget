@@ -22,7 +22,10 @@ data class RateSnapshot(val date: String, val fetchedAt: Long, val rates: Map<St
             val json = JSONObject(raw)
             val values = json.getJSONObject("rates")
             return RateSnapshot(json.getString("date"), json.getLong("fetchedAt"),
-                currencyNames.keys.associateWith { values.getString(it).toBigDecimal().also { n -> require(n.signum() > 0) } })
+                // Önceki sürümün 10 birimlik kaydı internet yokken de kullanılabilir.
+                currencyNames.keys.filter { values.has(it) }.associateWith {
+                    values.getString(it).toBigDecimal().also { n -> require(n.signum() > 0) }
+                }.also { require(it["EUR"]?.compareTo(BigDecimal.ONE) == 0) })
         }
 
         fun fromResponse(raw: String, fetchedAt: Long): RateSnapshot {
@@ -92,7 +95,8 @@ class RateRepository(context: Context) {
     }
 
     companion object {
-        const val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=USD,TRY,GBP,JPY,CHF,CAD,AUD,CNY,INR"
+        val ENDPOINT = "https://api.frankfurter.dev/v2/providers/ecb/rates?base=EUR&quotes=" +
+            currencyNames.keys.filter { it != "EUR" }.joinToString(",")
         private val networkLock = Mutex()
     }
 }

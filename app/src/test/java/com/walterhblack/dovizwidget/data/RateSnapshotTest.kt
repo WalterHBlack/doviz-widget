@@ -5,14 +5,46 @@ import org.junit.Test
 import java.math.BigDecimal
 
 class RateSnapshotTest {
-    private val valid = """[{"date":"2026-09-18","base":"EUR","quote":"USD","rate":1.146},{"date":"2026-09-18","base":"EUR","quote":"TRY","rate":55.9077},{"date":"2026-09-18","base":"EUR","quote":"GBP","rate":0.8588},{"date":"2026-09-18","base":"EUR","quote":"JPY","rate":169.5},{"date":"2026-09-18","base":"EUR","quote":"CHF","rate":0.94},{"date":"2026-09-18","base":"EUR","quote":"CAD","rate":1.61},{"date":"2026-09-18","base":"EUR","quote":"AUD","rate":1.78},{"date":"2026-09-18","base":"EUR","quote":"CNY","rate":8.34},{"date":"2026-09-18","base":"EUR","quote":"INR","rate":96.4}]"""
-    private val liveFrankfurterResponse = """{"amount":1.0,"base":"EUR","date":"2026-09-18","rates":{"USD":1.146,"TRY":55.9077,"GBP":0.8588,"JPY":169.5,"CHF":0.94,"CAD":1.61,"AUD":1.78,"CNY":8.34,"INR":96.4}}"""
+    // Yalnızca ayrıştırıcı için sentetik veriler; gerçek kur olarak kullanılmaz.
+    private val fixtureRates = linkedMapOf(
+        "USD" to "1.146", "TRY" to "55.9077", "GBP" to "0.8588",
+        "JPY" to "169.5", "CHF" to "0.94", "CAD" to "1.61",
+        "AUD" to "1.78", "CNY" to "8.34", "INR" to "96.4",
+        "NOK" to "2.5",
+        "SEK" to "2.5",
+        "DKK" to "2.5",
+        "PLN" to "2.5",
+        "CZK" to "2.5",
+        "HUF" to "2.5",
+        "NZD" to "2.5",
+        "SGD" to "2.5",
+        "HKD" to "2.5",
+        "ZAR" to "2.5",
+        "KRW" to "2.5",
+        "BRL" to "2.5",
+        "MXN" to "2.5",
+        "THB" to "2.5",
+        "IDR" to "2.5",
+        "MYR" to "2.5",
+        "PHP" to "2.5",
+        "RON" to "2.5",
+        "ILS" to "2.5",
+        "ISK" to "2.5",
+    )
+    private val valid = org.json.JSONArray().apply {
+        fixtureRates.forEach { (code, rate) ->
+            put(org.json.JSONObject().put("date", "2026-09-18").put("base", "EUR")
+                .put("quote", code).put("rate", BigDecimal(rate)))
+        }
+    }.toString()
+    private val objectResponse = org.json.JSONObject().put("base", "EUR").put("date", "2026-09-18")
+        .put("rates", org.json.JSONObject(fixtureRates.mapValues { BigDecimal(it.value) })).toString()
     @Test fun completeResponseSurvivesCacheRoundTrip() {
         val value = RateSnapshot.fromResponse(valid, 123L)
         assertEquals(value, RateSnapshot.decode(value.encode()))
     }
-    @Test fun liveFrankfurterResponseParses() {
-        val value = RateSnapshot.fromResponse(liveFrankfurterResponse, 123L)
+    @Test fun objectResponseParses() {
+        val value = RateSnapshot.fromResponse(objectResponse, 123L)
         assertEquals("2026-09-18", value.date)
         assertEquals(BigDecimal("1.146"), value.rates["USD"])
         assertEquals(BigDecimal("55.9077"), value.rates["TRY"])
