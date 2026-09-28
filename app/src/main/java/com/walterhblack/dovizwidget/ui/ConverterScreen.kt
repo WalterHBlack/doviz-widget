@@ -411,17 +411,27 @@ private fun CurrencyKeyboard(
     val equalsKey = Color(0xFF357C5B)
     val keyDivider = Color(0xFF101512)
     var calculated by rememberSaveable { mutableStateOf(false) }
+    var freshInput by rememberSaveable { mutableStateOf(true) }
     fun press(key: String) {
         if (key == "=") {
             runCatching { WidgetCalculator.evaluate(value) }.getOrNull()?.let {
                 onValueChange(WidgetCalculator.input(it))
                 calculated = true
+                freshInput = false
             }
             return
         }
-        val startsNew = calculated && key in listOf("0", "00", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",")
+        if (key == "C") {
+            onValueChange("0,00")
+            calculated = false
+            freshInput = true
+            return
+        }
+        val numberKeys = listOf("0", "00", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",")
+        val startsNew = (calculated || freshInput) && key in numberKeys
         onValueChange(WidgetCalculator.edit(if (startsNew) "0" else value, key))
         calculated = false
+        freshInput = false
     }
 
     Column(
