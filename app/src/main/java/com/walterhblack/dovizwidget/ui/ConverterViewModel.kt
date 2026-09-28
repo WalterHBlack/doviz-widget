@@ -20,6 +20,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     var favorites by mutableStateOf(repository.favorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
     var uiScale by mutableStateOf(repository.uiScale()); private set
+    var sourceCurrency by mutableStateOf(repository.sourceCurrency()); private set
 
     init {
         val cachedAt = snapshot?.fetchedAt ?: 0L
@@ -50,6 +51,12 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setAppearance(value: String) { theme = value; repository.setTheme(value) }
     fun setInterfaceScale(value: String) { uiScale = value; repository.setUiScale(value) }
+    fun setSelectedSourceCurrency(value: String) {
+        if (value in com.walterhblack.dovizwidget.data.currencyNames) {
+            sourceCurrency = value
+            repository.setSourceCurrency(value)
+        }
+    }
 }
 
 private val Long.hoursMillis: Long get() = this * 60L * 60L * 1000L

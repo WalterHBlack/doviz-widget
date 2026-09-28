@@ -84,8 +84,8 @@ fun ConverterScreen(model: ConverterViewModel) {
         )
     ) {
         Surface(Modifier.fillMaxSize()) {
-            var amount by rememberSaveable { mutableStateOf("1") }
-            var from by rememberSaveable { mutableStateOf("USD") }
+            var amount by remember { mutableStateOf("0,00") }
+            var from by rememberSaveable { mutableStateOf(model.sourceCurrency) }
             var rowCodes by rememberSaveable { mutableStateOf(currencyNames.keys.toList()) }
             var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
             val calculation = runCatching { WidgetCalculator.evaluate(amount) }
@@ -245,7 +245,10 @@ fun ConverterScreen(model: ConverterViewModel) {
                       Row(
                           Modifier.fillMaxWidth()
                               .background(if (isSource) selectedRowColor else listSurfaceColor)
-                              .clickable { from = code }
+                              .clickable {
+                                  from = code
+                                  model.setSelectedSourceCurrency(code)
+                              }
                               .padding(horizontal = 12.dp * uiScale, vertical = 18.dp * uiScale),
                           verticalAlignment = Alignment.CenterVertically
                       ) {
@@ -290,7 +293,10 @@ fun ConverterScreen(model: ConverterViewModel) {
                                                   this[index] = newCode
                                                   this[previousIndex] = code
                                               }
-                                              if (isSource) from = newCode
+                                              if (isSource) {
+                                                  from = newCode
+                                                  model.setSelectedSourceCurrency(newCode)
+                                              }
                                               menuOpen = false
                                           }
                                       )

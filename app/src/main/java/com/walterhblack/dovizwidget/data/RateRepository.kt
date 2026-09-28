@@ -68,6 +68,11 @@ class RateRepository(context: Context) {
     fun setTheme(value: String) { prefs.edit().putString("theme", value).apply() }
     fun uiScale(): String = prefs.getString("ui_scale", "normal")!!
     fun setUiScale(value: String) { prefs.edit().putString("ui_scale", value).apply() }
+    fun sourceCurrency(): String = prefs.getString("source_currency", "USD")
+        ?.takeIf { it in currencyNames } ?: "USD"
+    fun setSourceCurrency(value: String) {
+        if (value in currencyNames) prefs.edit().putString("source_currency", value).apply()
+    }
 
     suspend fun refresh(): RateSnapshot = withContext(Dispatchers.IO) {
         networkLock.withLock {
