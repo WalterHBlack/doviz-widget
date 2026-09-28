@@ -31,7 +31,9 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
-Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Görsel ölçek, launcher'ın gerçekten verdiği yüksekliğe ve bütün içeriğin kapladığı 650 dp'lik tasarım tabanına göre hesaplanır; Niagara'nın 264×436 dp alanında da dört tuş satırı görünür. Hedef seçimi on birimi tek satıra sıkıştırmak yerine beşerli iki satır gösterir.
+Glance `Row` ve `Column` en fazla 10 doğrudan çocuk destekler. Başlık, tutar, liste, boşluklar ve dört klavye satırı aynı köke eklenince son satır bu sınırı aşıyordu. Dört satır artık tek bir klavye `Column` içinde; yüksekliği dört satırın toplamıdır. Bu sorunu yalnızca yazıları veya tuşları küçültmek çözmez.
+
+Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Görsel ölçek genişlik için 300 dp, yükseklik için 460 dp tabanından hesaplanır; dört klavye satırının korunması ise tek bir grupta yer almalarıyla sağlanır. Hedef seçimi on birimi tek satıra sıkıştırmak yerine beşerli iki satır gösterir.
 
 `widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi desteklenen TRY, USD, EUR, GBP, JPY, CHF, CAD, AUD, CNY ve INR seçeneklerini widget içinde açar. Her widget kendi ifadesini ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
 

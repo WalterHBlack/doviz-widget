@@ -85,7 +85,7 @@ class RatesWidget : GlanceAppWidget() {
             // Bazı launcher'lar XML'deki minimum yüksekliği daha küçük bir alana sıkıştırır.
             // Ölçeği gerçek yüksekliğe göre düşürerek son klavye satırını dışarı taşırmayız.
             val widthScale = size.width.value / 300f
-            val heightScale = size.height.value / 650f
+            val heightScale = size.height.value / 460f
             val scale = min(widthScale, heightScale).coerceIn(0.58f, 1.65f)
             // Dört klavye satırı, 220x320 dp'lik minimum widget'ta da tamamen görünür.
             val keyHeight = 36.dp * scale
@@ -173,6 +173,9 @@ class RatesWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.padding(horizontal = 16.dp * scale),
                     style = TextStyle(color = muted, fontSize = (10f * scale).sp), maxLines = 1)
                 Spacer(GlanceModifier.height(sectionGap))
+                // Glance Row/Column en fazla 10 doğrudan çocuk taşır. Dört satırı
+                // gruplamak, son satırın ana Column sınırında düşmesini önler.
+                Column(GlanceModifier.fillMaxWidth().height(keyHeight * 4)) {
                     listOf(
                         listOf("7", "8", "9", "÷", "C"),
                         listOf("4", "5", "6", "×", "⌫"),
@@ -186,6 +189,7 @@ class RatesWidget : GlanceAppWidget() {
                             }
                         }
                     }
+                }
             }
         }
     }
