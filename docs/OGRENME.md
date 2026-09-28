@@ -31,7 +31,7 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
-Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Hedef seçimi on birimi tek satıra sıkıştırmak yerine beşerli iki satır gösterir.
+Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır; dört tuş satırı 220x320 dp'lik minimum boyutta da tamamen görünür. Hedef seçimi on birimi tek satıra sıkıştırmak yerine beşerli iki satır gösterir.
 
 `widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi desteklenen TRY, USD, EUR, GBP, JPY, CHF, CAD, AUD, CNY ve INR seçeneklerini widget içinde açar. Her widget kendi ifadesini ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
 

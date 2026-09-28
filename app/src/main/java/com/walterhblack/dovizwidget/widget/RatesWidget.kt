@@ -85,8 +85,9 @@ class RatesWidget : GlanceAppWidget() {
             val widthScale = (size.width.value / 300f).coerceIn(0.82f, 1.65f)
             val heightScale = (size.height.value / 560f).coerceIn(0.82f, 1.65f)
             val scale = min(widthScale, heightScale)
-            val keyHeight = 42.dp * scale
-            val sectionGap = 6.dp * scale
+            // Dört klavye satırı, 220x320 dp'lik minimum widget'ta da tamamen görünür.
+            val keyHeight = 36.dp * scale
+            val sectionGap = 4.dp * scale
             Column(GlanceModifier.fillMaxSize().background(widgetBackground)) {
                 Row(
                     GlanceModifier.fillMaxWidth()
