@@ -35,7 +35,7 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 `data/WidgetCalculator.kt` virgüllü tutarları ve dört işlemi hesaplar. Çarpma ve bölme önceliklidir; sıfıra bölme ve eksik işlemler mesajla gösterilir. Tamamlanmış ifade için sonuçlar otomatik güncellenir; eşittir ifadeyi hesaplanan tutarla değiştirir. Eşittirden sonra rakam yeni işlem başlatır, işlem işareti sonuç üzerinden devam eder. Yenileme hariç tuşlar ağ isteği yapmaz. Negatif sonuçların dönüşümü de işaret korunarak gösterilir.
 
-Widget için ilk öneri 5×7 hücrelik büyük alan, küçültülebilen alt sınır ise 220×320 dp'dir. İçerik widget'ın genişlik ve yüksekliğine göre birlikte büyüyüp küçülür; klavye ve favori satırları her iki boyutta da görünür. Üst başlık uygulamayı açar; klavye ve hedef seçimi uygulamayı açmaz. Tuş sıraları `7 8 9 ÷ C`, `4 5 6 × ⌫`, `1 2 3 − ↻`, `0 00 , + =` şeklindedir.
+Widget için ilk öneri 5×7 hücrelik büyük alan, küçültülebilen alt sınır ise 220×320 dp'dir. İçerik widget'ın genişlik ve yüksekliğine göre birlikte büyüyüp küçülür; klavye ve favori satırları her iki boyutta da görünür. Üst başlık uygulamayı açar; klavye ve hedef seçimi uygulamayı açmaz. Başlık, tutar alanı ve favori listesi uygulamadaki koyu yeşil yüzey tonlarını kullanır; tuşlar sayı, işlem ve yardımcı tuş olarak ayrı yeşil tonlarla görünür. Tuş sıraları `7 8 9 ÷ C`, `4 5 6 × ⌫`, `1 2 3 − ↻`, `0 00 , + =` şeklindedir.
 
 ## Kotlin'den dört küçük parça
 

@@ -36,16 +36,31 @@ private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
 private val keyParameter = ActionParameters.Key<String>("calculator_key")
 private val accent = ColorProvider(Color(0xFFA5F3CF))
 private val foreground = ColorProvider(Color(0xFFF0FFF7))
+private val widgetBackground = Color(0xFF101B17)
+private val widgetSurface = Color(0xFF182720)
+private val widgetRow = Color(0xFF1D3028)
+private val numberKey = Color(0xFF29332F)
+private val operationKey = Color(0xFF205A42)
+private val utilityKey = Color(0xFF25463A)
+private val equalsKey = Color(0xFF357C5B)
+private val keyDivider = Color(0xFF101512)
 
 private fun calculatorAction(key: String): Action = actionRunCallback<CalculatorAction>(
     actionParametersOf(keyParameter to key))
 
 @Composable
-private fun WidgetKey(label: String, modifier: GlanceModifier, action: Action, scale: Float, operation: Boolean = false) {
-    Box(modifier.background(Color.Black).padding(1.dp * scale)) {
-        Box(GlanceModifier.fillMaxSize().background(if (operation) Color(0xFF285640) else Color(0xFF343B38))
+private fun WidgetKey(label: String, modifier: GlanceModifier, action: Action, scale: Float) {
+    val background = when (label) {
+        "=" -> equalsKey
+        "+", "−", "×", "÷" -> operationKey
+        "C", "⌫", "↻" -> utilityKey
+        else -> numberKey
+    }
+    val textColor = if (label in listOf("=", "+", "−", "×", "÷", "C", "⌫", "↻")) accent else foreground
+    Box(modifier.background(keyDivider).padding(0.7.dp * scale)) {
+        Box(GlanceModifier.fillMaxSize().background(background)
             .clickable(action), contentAlignment = Alignment.Center) {
-            Text(label, style = TextStyle(color = foreground, fontSize = (20f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
+            Text(label, style = TextStyle(color = textColor, fontSize = (20f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
         }
     }
 }
@@ -69,26 +84,50 @@ class RatesWidget : GlanceAppWidget() {
             val widthScale = (size.width.value / 300f).coerceIn(0.82f, 1.65f)
             val heightScale = (size.height.value / 560f).coerceIn(0.82f, 1.65f)
             val scale = min(widthScale, heightScale)
-            val edgePadding = 8.dp * scale
-            val keyHeight = 44.dp * scale
-            val sectionGap = 4.dp * scale
-            Column(GlanceModifier.fillMaxSize().background(Color(0xFF14241F)).padding(edgePadding)) {
-                Text("DÖVİZ CEPTE · Favoriler ↗", modifier = GlanceModifier.fillMaxWidth().padding(4.dp * scale)
-                    .clickable(actionStartActivity<MainActivity>()),
-                    style = TextStyle(color = accent, fontSize = (12f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
-                Row(GlanceModifier.fillMaxWidth().height(56.dp * scale), verticalAlignment = Alignment.CenterVertically) {
-                    Column(GlanceModifier.defaultWeight().padding(4.dp * scale)) {
-                        Text("Tutar", style = TextStyle(color = accent, fontSize = (11f * scale).sp))
-                        Text(expression, style = TextStyle(color = foreground, fontSize = (18f * scale).sp), maxLines = 1)
+            val edgePadding = 10.dp * scale
+            val keyHeight = 42.dp * scale
+            val sectionGap = 6.dp * scale
+            Column(GlanceModifier.fillMaxSize().background(widgetBackground).padding(edgePadding)) {
+                Row(
+                    GlanceModifier.fillMaxWidth().background(widgetSurface).cornerRadius(18.dp * scale)
+                        .padding(horizontal = 12.dp * scale, vertical = 8.dp * scale)
+                        .clickable(actionStartActivity<MainActivity>()),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(GlanceModifier.defaultWeight()) {
+                        Text("DÖVİZ CEPTE", style = TextStyle(color = accent, fontSize = (13f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                        Text("Favoriler", style = TextStyle(color = accent, fontSize = (10f * scale).sp), maxLines = 1)
                     }
-                    Text("Hedef: $target ▾", modifier = GlanceModifier.padding(10.dp * scale).clickable(calculatorAction("target")),
-                        style = TextStyle(color = accent, fontSize = (14f * scale).sp, fontWeight = FontWeight.Bold))
+                    Text("↗", style = TextStyle(color = accent, fontSize = (17f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
                 }
-                Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                Spacer(GlanceModifier.height(sectionGap))
+                Row(
+                    GlanceModifier.fillMaxWidth().height(62.dp * scale).background(widgetSurface).cornerRadius(18.dp * scale)
+                        .padding(horizontal = 12.dp * scale),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(GlanceModifier.defaultWeight()) {
+                        Text("TUTAR", style = TextStyle(color = accent, fontSize = (10f * scale).sp, fontWeight = FontWeight.Bold))
+                        Text(expression, style = TextStyle(color = foreground, fontSize = (20f * scale).sp), maxLines = 1)
+                    }
+                    Box(
+                        GlanceModifier.background(operationKey).cornerRadius(12.dp * scale)
+                            .padding(horizontal = 10.dp * scale, vertical = 8.dp * scale)
+                            .clickable(calculatorAction("target")),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Hedef: $target ▾", style = TextStyle(color = accent, fontSize = (12f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                    }
+                }
+                Spacer(GlanceModifier.height(sectionGap))
+                Column(
+                    GlanceModifier.fillMaxWidth().defaultWeight().background(widgetSurface).cornerRadius(18.dp * scale)
+                        .padding(horizontal = 12.dp * scale, vertical = 8.dp * scale)
+                ) {
                     if (state[choosingTargetKey] == true) {
                         Row(GlanceModifier.fillMaxWidth().height(48.dp * scale)) {
                             currencyNames.keys.forEach { code ->
-                                WidgetKey(code, GlanceModifier.defaultWeight().fillMaxHeight(), calculatorAction("target:$code"), scale, true)
+                                WidgetKey(code, GlanceModifier.defaultWeight().fillMaxHeight(), calculatorAction("target:$code"), scale)
                             }
                         }
                     } else {
@@ -101,7 +140,11 @@ class RatesWidget : GlanceAppWidget() {
                                         if (value.signum() < 0) positive.negate() else positive
                                     }
                                 }
-                                Row(GlanceModifier.fillMaxWidth().padding(vertical = 3.dp * scale), verticalAlignment = Alignment.CenterVertically) {
+                                Row(
+                                    GlanceModifier.fillMaxWidth().background(widgetRow).cornerRadius(10.dp * scale)
+                                        .padding(horizontal = 10.dp * scale, vertical = 6.dp * scale),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Text(code, style = TextStyle(color = accent, fontSize = (15f * scale).sp, fontWeight = FontWeight.Bold))
                                     Text("${converted?.let { CurrencyMath.format(it) } ?: "—"} $target",
                                         modifier = GlanceModifier.defaultWeight(),
@@ -113,7 +156,9 @@ class RatesWidget : GlanceAppWidget() {
                             else if (snapshot == null) Text("Kurlar için ↻ tuşuna dokun.", style = TextStyle(color = accent, fontSize = (11f * scale).sp))
                         }
                     }
+                Spacer(GlanceModifier.height(sectionGap))
                 Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
+                    modifier = GlanceModifier.padding(horizontal = 4.dp * scale),
                     style = TextStyle(color = accent, fontSize = (10f * scale).sp), maxLines = 1)
                 Spacer(GlanceModifier.height(sectionGap))
                     listOf(
@@ -123,9 +168,9 @@ class RatesWidget : GlanceAppWidget() {
                         listOf("0", "00", ",", "+", "=")
                     ).forEach { row ->
                         Row(GlanceModifier.fillMaxWidth().height(keyHeight)) {
-                            row.forEachIndexed { column, key ->
+                            row.forEach { key ->
                                 WidgetKey(key, GlanceModifier.defaultWeight().fillMaxHeight(),
-                                    if (key == "↻") actionRunCallback<RefreshAction>() else calculatorAction(key), scale, column >= 3)
+                                    if (key == "↻") actionRunCallback<RefreshAction>() else calculatorAction(key), scale)
                             }
                         }
                     }
