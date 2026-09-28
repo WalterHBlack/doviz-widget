@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -45,9 +46,43 @@ import kotlin.math.abs
 @Composable
 fun ConverterScreen(model: ConverterViewModel) {
     val dark = when (model.theme) { "dark" -> true; "light" -> false; else -> isSystemInDarkTheme() }
-    val colors = if (dark) darkColorScheme(primary = Color(0xFFA5F3CF), background = Color(0xFF0B1513), surface = Color(0xFF14241F))
-        else lightColorScheme(primary = Color(0xFF146747), background = Color(0xFFF4F8F3), surface = Color.White)
-    MaterialTheme(colorScheme = colors) {
+    val colors = if (dark) {
+        darkColorScheme(
+            primary = Color(0xFFA5F3CF),
+            onPrimary = Color(0xFF003824),
+            background = Color(0xFF091310),
+            onBackground = Color(0xFFE3EAE5),
+            surface = Color(0xFF111C18),
+            onSurface = Color(0xFFE3EAE5),
+            surfaceContainer = Color(0xFF16231F),
+            surfaceContainerHighest = Color(0xFF202C28),
+            onSurfaceVariant = Color(0xFFB8C4BD),
+            outline = Color(0xFF65736C),
+            outlineVariant = Color(0xFF34413B)
+        )
+    } else {
+        lightColorScheme(
+            primary = Color(0xFF146747),
+            onPrimary = Color.White,
+            background = Color(0xFFF4F7F4),
+            onBackground = Color(0xFF18211D),
+            surface = Color.White,
+            onSurface = Color(0xFF18211D),
+            surfaceContainer = Color(0xFFEAF0EC),
+            surfaceContainerHighest = Color(0xFFDDE7E1),
+            onSurfaceVariant = Color(0xFF56615B),
+            outline = Color(0xFF76837C),
+            outlineVariant = Color(0xFFD0D9D3)
+        )
+    }
+    MaterialTheme(
+        colorScheme = colors,
+        shapes = Shapes(
+            small = RoundedCornerShape(12.dp),
+            medium = RoundedCornerShape(18.dp),
+            large = RoundedCornerShape(26.dp)
+        )
+    ) {
         Surface(Modifier.fillMaxSize()) {
             var amount by rememberSaveable { mutableStateOf("1") }
             var from by rememberSaveable { mutableStateOf("USD") }
@@ -58,8 +93,9 @@ fun ConverterScreen(model: ConverterViewModel) {
             val calculationError = calculation.exceptionOrNull()?.message
             val snapshot = model.snapshot
             val density = LocalDensity.current
-            val updateBarColor = if (dark) Color(0xFF101715) else Color(0xFFE6EEE8)
-            val selectedRowColor = if (dark) Color(0xFF1A332B) else Color(0xFFDCEFE4)
+            val updateBarColor = if (dark) Color(0xFF121F1B) else Color(0xFFE5EEE8)
+            val selectedRowColor = if (dark) Color(0xFF18392E) else Color(0xFFD9F0E3)
+            val listSurfaceColor = if (dark) Color(0xFF111B18) else Color.White
             var manageCurrencies by remember { mutableStateOf(false) }
             var showSettings by remember { mutableStateOf(false) }
             val uiScale = when (model.uiScale) {
@@ -152,28 +188,49 @@ fun ConverterScreen(model: ConverterViewModel) {
                       .padding(horizontal = 16.dp * uiScale, vertical = 18.dp * uiScale),
                   verticalArrangement = Arrangement.spacedBy(12.dp * uiScale)
               ) {
-                  Row(Modifier.fillMaxWidth().background(updateBarColor).padding(start = 16.dp * uiScale, end = 8.dp * uiScale),
-                      verticalAlignment = Alignment.CenterVertically) {
-                      Text(
-                          snapshot?.let {
-                              "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
-                                  .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
-                          } ?: "Güncel kurlar yükleniyor",
-                          Modifier.weight(1f).padding(vertical = 10.dp * uiScale),
-                          color = colors.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                          style = MaterialTheme.typography.bodyMedium
-                      )
-                      TextButton(onClick = { manageCurrencies = true }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                          Text("Yönet")
+                  Row(
+                      Modifier.fillMaxWidth()
+                          .clip(MaterialTheme.shapes.large)
+                          .background(updateBarColor)
+                          .padding(start = 18.dp * uiScale, end = 6.dp * uiScale, top = 8.dp * uiScale, bottom = 8.dp * uiScale),
+                      verticalAlignment = Alignment.CenterVertically
+                  ) {
+                      Column(Modifier.weight(1f)) {
+                          Text(
+                              "DÖVİZ CEPTE",
+                              color = colors.primary,
+                              fontWeight = FontWeight.Bold,
+                              style = MaterialTheme.typography.labelLarge,
+                              letterSpacing = 1.4.sp
+                          )
+                          Text(
+                              snapshot?.let {
+                                  "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
+                                      .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
+                              } ?: "Güncel kurlar yükleniyor",
+                              color = colors.onSurfaceVariant,
+                              style = MaterialTheme.typography.bodySmall
+                          )
                       }
-                      TextButton(onClick = { showSettings = true }, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                          Text("⚙ Ayarlar")
-                      }
+                      TextButton(
+                          onClick = { manageCurrencies = true },
+                          contentPadding = PaddingValues(horizontal = 10.dp * uiScale)
+                      ) { Text("Favoriler") }
+                      FilledTonalButton(
+                          onClick = { showSettings = true },
+                          contentPadding = PaddingValues(horizontal = 12.dp * uiScale),
+                          modifier = Modifier.heightIn(min = 40.dp * uiScale)
+                      ) { Text("⚙") }
                   }
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                   model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
-                  Column(Modifier.fillMaxWidth()) {
+                  Column(
+                      Modifier.fillMaxWidth()
+                          .clip(MaterialTheme.shapes.large)
+                          .background(listSurfaceColor)
+                          .border(1.dp, colors.outlineVariant, MaterialTheme.shapes.large)
+                  ) {
                   rowCodes.forEachIndexed { index, code ->
                       val isSource = code == from
                       var menuOpen by remember(code) { mutableStateOf(false) }
@@ -187,7 +244,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                       Row(
                           Modifier.fillMaxWidth()
-                              .background(if (isSource) selectedRowColor else colors.background)
+                              .background(if (isSource) selectedRowColor else listSurfaceColor)
                               .clickable { from = code }
                               .padding(horizontal = 12.dp * uiScale, vertical = 18.dp * uiScale),
                           verticalAlignment = Alignment.CenterVertically
@@ -208,7 +265,10 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   }
                               ),
                               contentDescription = "$code bayrağı",
-                              modifier = Modifier.size(width = 64.dp * uiScale, height = 44.dp * uiScale)
+                              contentScale = ContentScale.Crop,
+                              modifier = Modifier
+                                  .size(width = 64.dp * uiScale, height = 44.dp * uiScale)
+                                  .clip(RoundedCornerShape(9.dp * uiScale))
                           )
                           Spacer(Modifier.width(10.dp * uiScale))
                           Box {
@@ -247,22 +307,42 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   color = colors.onSurfaceVariant)
                           }
                       }
+                      if (index < rowCodes.lastIndex) {
+                          HorizontalDivider(
+                              modifier = Modifier.padding(start = 86.dp * uiScale),
+                              thickness = 0.7.dp,
+                              color = colors.outlineVariant.copy(alpha = 0.75f)
+                          )
+                      }
                   }
                   }
-                  Column(Modifier.fillMaxWidth().background(colors.surfaceContainer, MaterialTheme.shapes.medium)
-                      .padding(horizontal = 16.dp * uiScale, vertical = 10.dp * uiScale)) {
-                      Text("Tutar", style = MaterialTheme.typography.labelSmall,
-                          color = colors.onSurfaceVariant)
-                      Text(amount, style = MaterialTheme.typography.titleLarge,
-                          color = colors.onSurface, maxLines = 1)
-                      if (calculationError != null) {
-                          Text(calculationError, color = colors.error,
-                              style = MaterialTheme.typography.bodySmall)
+                  Surface(
+                      modifier = Modifier.fillMaxWidth(),
+                      shape = MaterialTheme.shapes.medium,
+                      color = colors.surfaceContainer,
+                      tonalElevation = 1.dp
+                  ) {
+                      Row(
+                          Modifier.padding(horizontal = 18.dp * uiScale, vertical = 13.dp * uiScale),
+                          verticalAlignment = Alignment.CenterVertically
+                      ) {
+                          Column(Modifier.weight(1f)) {
+                              Text("HESAPLANAN TUTAR", style = MaterialTheme.typography.labelSmall,
+                                  color = colors.primary, fontWeight = FontWeight.Bold, letterSpacing = 0.8.sp)
+                              Text(amount, style = MaterialTheme.typography.titleLarge,
+                                  color = colors.onSurface, maxLines = 1)
+                              if (calculationError != null) {
+                                  Text(calculationError, color = colors.error,
+                                      style = MaterialTheme.typography.bodySmall)
+                              }
+                          }
+                          Text(from, color = colors.onSurfaceVariant, style = MaterialTheme.typography.titleMedium)
                       }
                   }
                   OutlinedButton(onClick = { manageCurrencies = true },
-                      modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp * uiScale)) {
-                      Text("☷   Widget favorilerini yönet", fontSize = (18.sp.value * uiScale).sp)
+                      modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp * uiScale),
+                      shape = MaterialTheme.shapes.medium) {
+                      Text("★   Widget favorilerini yönet", fontSize = (16.sp.value * uiScale).sp)
                   }
                   Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
@@ -318,7 +398,12 @@ private fun CurrencyKeyboard(
     onDragFinish: (KeyboardMode, Float) -> Unit
 ) {
     val startDrag by rememberUpdatedState(onDragStart)
-    val keyDivider = Color.Black
+    val keyboardSurface = Color(0xFF1A2420)
+    val numberKey = Color(0xFF29322F)
+    val operationKey = Color(0xFF205A42)
+    val utilityKey = Color(0xFF254238)
+    val equalsKey = Color(0xFF357C5B)
+    val keyDivider = Color(0xFF101512)
     var calculated by rememberSaveable { mutableStateOf(false) }
     fun press(key: String) {
         if (key == "=") {
@@ -333,10 +418,15 @@ private fun CurrencyKeyboard(
         calculated = false
     }
 
-    Column(modifier.fillMaxWidth().clipToBounds().background(colors.surfaceContainerHighest)) {
+    Column(
+        modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
+            .clipToBounds()
+            .background(keyboardSurface)
+    ) {
         Box(
             Modifier.fillMaxWidth().height(28.dp * uiScale)
-                .background(colors.surfaceContainerHighest)
+                .background(keyboardSurface)
                 .pointerInput(minHeightPx, dockedHeightPx) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -398,6 +488,7 @@ private fun CurrencyKeyboard(
                     .background(colors.primary.copy(alpha = 0.88f))
             )
         }
+        HorizontalDivider(thickness = 0.5.dp, color = Color.White.copy(alpha = 0.08f))
         // Tuşlar sıkışmaz: sabit boydaki ızgara kapanırken panelin altına kayar.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
             val closedFraction = ((dockedHeightPx - currentHeightPx) /
@@ -413,13 +504,20 @@ private fun CurrencyKeyboard(
                 rows.forEach { row ->
                     Row(Modifier.fillMaxWidth().weight(1f)) {
                         row.forEach { key ->
-                            val special = key in listOf("C", "⌫", "↻", "=", "+", "−", "×", "÷")
+                            val isOperation = key in listOf("=", "+", "−", "×", "÷")
+                            val isUtility = key in listOf("C", "⌫", "↻")
                             KeyboardKey(
                                 label = key,
-                                background = if (special) Color(0xFF285640) else Color(0xFF343B38),
-                                foreground = if (special) Color(0xFFA5F3CF) else Color(0xFFF0FFF7),
+                                background = when {
+                                    key == "=" -> equalsKey
+                                    isOperation -> operationKey
+                                    isUtility -> utilityKey
+                                    else -> numberKey
+                                },
+                                foreground = if (isOperation || isUtility) Color(0xFFA5F3CF) else Color(0xFFF2F7F4),
                                 border = keyDivider,
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
+                                fontScale = uiScale,
                                 contentDescription = if (key == "↻") "Kurları yenile" else null,
                                 onClick = if (key == "↻") onRefresh else { { press(key) } }
                             )
@@ -434,18 +532,23 @@ private fun CurrencyKeyboard(
 @Composable
 private fun KeyboardKey(
     label: String?, background: Color, foreground: Color, border: Color,
-    modifier: Modifier, contentDescription: String? = null, onClick: (() -> Unit)?
+    modifier: Modifier, fontScale: Float, contentDescription: String? = null, onClick: (() -> Unit)?
 ) {
     val accessibility = if (contentDescription == null) Modifier else Modifier.semantics {
         this.contentDescription = contentDescription
     }
     Box(
-        modifier.background(background).border(1.dp, border).then(accessibility).then(
+        modifier.background(background).border(0.6.dp, border).then(accessibility).then(
             if (onClick == null) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)
         ),
         contentAlignment = Alignment.Center
     ) {
-        if (label != null) Text(label, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = foreground)
+        if (label != null) Text(
+            label,
+            fontSize = (26.sp.value * fontScale).sp,
+            fontWeight = FontWeight.SemiBold,
+            color = foreground
+        )
     }
 }
 
