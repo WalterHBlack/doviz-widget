@@ -99,7 +99,7 @@ fun ConverterScreen(model: ConverterViewModel) {
             val density = LocalDensity.current
             val updateBarColor = if (dark) Color(0xFF121F1B) else Color(0xFFE5EEE8)
             val selectedRowColor = if (dark) Color(0xFF18392E) else Color(0xFFD9F0E3)
-            val listSurfaceColor = if (dark) Color(0xFF111B18) else Color.White
+            val listSurfaceColor = colors.background
             var manageCurrencies by remember { mutableStateOf(false) }
             var showSettings by remember { mutableStateOf(false) }
             var pickingCode by remember { mutableStateOf<String?>(null) }
@@ -163,11 +163,12 @@ fun ConverterScreen(model: ConverterViewModel) {
                 ) {
                   Column(
                   Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                      .padding(horizontal = 16.dp * uiScale, vertical = 18.dp * uiScale),
+                      .padding(vertical = 18.dp * uiScale),
                   verticalArrangement = Arrangement.spacedBy(12.dp * uiScale)
               ) {
                   Row(
                       Modifier.fillMaxWidth()
+                          .padding(horizontal = 16.dp * uiScale)
                           .clip(MaterialTheme.shapes.large)
                           .background(updateBarColor)
                           .padding(start = 18.dp * uiScale, end = 6.dp * uiScale, top = 8.dp * uiScale, bottom = 8.dp * uiScale),
@@ -201,19 +202,17 @@ fun ConverterScreen(model: ConverterViewModel) {
                       ) { Text("⚙", modifier = Modifier.semantics { contentDescription = "Ayarlar" }) }
                   }
                   if (model.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
-                  model.error?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
-                  calculationError?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
+                  model.error?.let { Text(it, Modifier.padding(horizontal = 16.dp * uiScale), color = colors.error, style = MaterialTheme.typography.bodySmall) }
+                  calculationError?.let { Text(it, Modifier.padding(horizontal = 16.dp * uiScale), color = colors.error, style = MaterialTheme.typography.bodySmall) }
 
-                  Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                  Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp * uiScale), verticalAlignment = Alignment.CenterVertically) {
                       Text("Para birimleri", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
                           color = colors.onSurfaceVariant)
                       Text("${rowCodes.size} favori", style = MaterialTheme.typography.labelMedium, color = colors.primary)
                   }
                   Column(
                       Modifier.fillMaxWidth()
-                          .clip(MaterialTheme.shapes.large)
                           .background(listSurfaceColor)
-                          .border(1.dp, colors.outlineVariant, MaterialTheme.shapes.large)
                   ) {
                   rowCodes.forEachIndexed { index, code ->
                       val isSource = code == from
@@ -231,7 +230,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                               .clickable {
                                   model.setSelectedSourceCurrency(code)
                               }
-                              .padding(horizontal = 12.dp * uiScale, vertical = 14.dp * uiScale),
+                              .padding(horizontal = 20.dp * uiScale, vertical = 14.dp * uiScale),
                           verticalAlignment = Alignment.CenterVertically
                       ) {
                           CurrencyFlag(code, Modifier.size(48.dp * uiScale, 34.dp * uiScale))
@@ -264,6 +263,7 @@ fun ConverterScreen(model: ConverterViewModel) {
                   }
                   }
                   Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
+                      modifier = Modifier.padding(horizontal = 16.dp * uiScale),
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
               }
                 }

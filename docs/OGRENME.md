@@ -101,6 +101,8 @@ Yeni para birimi eklerken servis desteği, katalog ve bayrak eşlemesi birlikte 
 
 ## Ana sayfa ve widget favorileri
 
+Ana sayfanın kur listesi `ConverterScreen.kt` içinde çerçevesiz ve tam genişlikte çizilir. Seçilen satır köşeleri düz yeşil bir şerittir; diğer satırlar sayfanın arka planını kullanır. Satır içindeki yazı ve bayrak boşlukları korunur.
+
 `CurrencyDialogs.kt` içindeki `HandleOnlySheet` panelin sürükleme hareketini yalnızca üst tutamaçta dinler. Listeyi kaydırmak paneli kapatmaz; üst çizgiyi aşağı çekmek kapatır, Android geri düğmesi de kullanılabilir. Ana sayfa yıldızları yeşil, widget yıldızları altın sarısıdır; sekme adları da aynı renklerle ayrılır.
 
 Ana sayfa ilk açılışta USD, EUR, TRY, GBP sırasıyla başlar. Üstteki Favoriler düğmesi aynı panelde Ana sayfa ve Widget sekmelerini açar. Ana sayfa seçimleri `home_favorites` kaydında sıralı liste olarak tutulur; en az bir birim seçili kalır. Widget seçimleri ayrı `favorites` kaydındadır ve en fazla dört birim alır. Ana sayfa seçimi widget listesini değiştirmez. Son kaynak ana sayfadan kaldırılırsa kalan ilk birim kaynak olur. Satırdaki para birimi değiştirilirse yeni liste de kaydedilir.
