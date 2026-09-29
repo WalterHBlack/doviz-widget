@@ -17,7 +17,7 @@ Yukarıda kısaltılan yollar `app/src/main/java/com/walterhblack/dovizwidget/` 
 
 `ui/CurrencyDialogs.kt` aramalı para birimi seçimini, yıldızlı favorileri, bayrak eşlemelerini ve tam ekran ayarları içerir. Kod veya Türkçe isimle arama yapılır; Tümü/Favoriler filtresi kullanılır. Ayarlar tema ve arayüz boyutunu örnek satırda gösterir. `ConverterScreen.kt` ana listedeki satırları ve seçilen kaynağı yönetir.
 
-Desteklenen birim sayısı 29'dur: TRY, USD, EUR, GBP, JPY, CHF, CAD, AUD, CNY, INR, NOK, SEK, DKK, PLN, CZK, HUF, NZD, SGD, HKD, ZAR, KRW, BRL, MXN, THB, IDR, MYR, PHP, RON, ISK. ECB isteğinin `quotes` listesi `currencyNames` üzerinden üretilir. Eski sürümün daha küçük kur kaydı okunabilir; eksik birimler için açılışta güncelleme istenir. İnternet yoksa yeni birimlerin karşılığı veri gelene kadar çizgiyle gösterilir.
+Desteklenen birim sayısı 160'tır. ILS katalogda ve servis isteğinde bulunmaz. Frankfurter isteğinin `quotes` listesi `currencyNames` üzerinden üretilir; farklı merkez bankaları ve resmî kaynaklardan kurlar alınır. Eski sürümün daha küçük kur kaydı okunabilir; eksik birimler için açılışta güncelleme istenir. İnternet yoksa yeni birimlerin karşılığı veri gelene kadar çizgiyle gösterilir. `RateSnapshot.rateDates` her birimin tarihini, `source` kaynağı saklar; farklı tarihli kurların genel etiketi tarih aralığıdır.
 
 ## Bir dokunuşun yolculuğu
 
@@ -41,9 +41,9 @@ Hızlı basışlar sırayla işlenir; her widget'ın girdisi DataStore'a kaydedi
 
 Glance `Row` ve `Column` en fazla 10 doğrudan çocuk destekler. Başlık, tutar, liste, boşluklar ve dört klavye satırı aynı köke eklenince son satır bu sınırı aşıyordu. Dört satır artık tek bir klavye `Column` içinde; yüksekliği dört satırın toplamıdır. Bu sorunu yalnızca yazıları veya tuşları küçültmek çözmez.
 
-Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Görsel ölçek genişlik için 300 dp, yükseklik için 460 dp tabanından hesaplanır; dört klavye satırının korunması ise tek bir grupta yer almalarıyla sağlanır. Hedef seçimi 29 birimi onarlı sayfalarda, beşerli iki satır gösterir. Favoriler de widget yüksekliğine göre sayfalara ayrılır; Önceki/Sonraki düğmeleri uygulamayı açmadan geçiş yapar.
+Widget görünümü tek bir sade yüzeyden oluşur: üstte küçük başlık, altında tutar ve hedef, ortada ince çizgilerle ayrılan favoriler bulunur. Sonuçlar büyük, hedef birim kodları küçük yazılır. Klavye alt bölümde tam genişliği kullanır. Görsel ölçek genişlik için 300 dp, yükseklik için 460 dp tabanından hesaplanır; dört klavye satırının korunması ise tek bir grupta yer almalarıyla sağlanır. Hedef seçimi 160 birimi onarlı sayfalarda, beşerli iki satır gösterir. En fazla dört favori tek sayfada görünür.
 
-`widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Uygulamada yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi desteklenen 29 para birimini widget içinde açar. Her widget kendi ifadesini, sayfasını ve hedefini kalıcı olarak saklar; favoriler ve kur verisi uygulamayla ortaktır.
+`widget/RatesWidget.kt` ana ekran widget'ının görünümünü ve tuş işlemlerini yönetir. Widget için yıldızlanan favoriler solda, ortak tutarın seçilen hedef para birimindeki karşılığı sağda görünür. Hedef düğmesi desteklenen 160 para birimini widget içinde açar. Her widget kendi ifadesini, sayfasını ve hedefini kalıcı olarak saklar; widget favorileri ve kur verisi uygulamayla ortaktır.
 
 `data/WidgetCalculator.kt` virgüllü tutarları ve dört işlemi hesaplar. Çarpma ve bölme önceliklidir; sıfıra bölme ve eksik işlemler mesajla gösterilir. Tamamlanmış ifade için sonuçlar otomatik güncellenir; eşittir ifadeyi hesaplanan tutarla değiştirir. Eşittirden sonra rakam yeni işlem başlatır, işlem işareti sonuç üzerinden devam eder. Yenileme hariç tuşlar ağ isteği yapmaz. Negatif sonuçların dönüşümü de işaret korunarak gösterilir.
 
@@ -88,7 +88,7 @@ Tüm kurlar 1 EUR karşılığı olarak gelir. Örnek **uydurma test verisi**: 1
 `app/src/test/java/com/walterhblack/dovizwidget/data/` altında:
 - `CurrencyMathTest.kt`: çapraz kur, ters dönüşüm, aynı para birimi, Türkçe virgül, hatalı giriş ve sıfır kur.
 - `WidgetCalculatorTest.kt`: işlem önceliği, Türkçe ondalık, sıfıra bölme ve operatör düzeltmesi.
-- `RateSnapshotTest.kt`: API yanıtının tam olması, tarihlerin eşleşmesi, pozitif kur ve kaydet/oku tutarlılığı.
+- `RateSnapshotTest.kt`: temel kurların bulunması, farklı tarihlerin korunması, pozitif kur ve kaydet/oku tutarlılığı.
 
 ## Küçük denemeler
 
@@ -97,9 +97,11 @@ GitHub'a başlangıç durumunu kaydettikten sonra:
 2. Aynı dosyadaki `Color(0xFFA5F3CF)` değerini değiştir; koyu temanın vurgu rengini gözle.
 3. `CurrencyMathTest.kt` içine 0 USD → TRY sonucunun 0 olduğunu kontrol eden bir test ekle.
 
-Yeni para birimi eklemek yalnızca menüye bir satır koymak değildir: servis isteği, doğrulama, `WidgetValueViews.kt` satır eşlemesi ve `widget_values.xml` de birlikte güncellenmelidir.
+Yeni para birimi eklerken servis desteği, katalog ve bayrak eşlemesi birlikte ele alınır. `widget_values.xml` artık para birimi başına satır içermez: dört genel satırı `WidgetValueViews.kt` seçilen favorilerle doldurur. Böylece katalog büyüdüğünde tuş başına yüzlerce gizli satır güncellenmez.
 
 ## Ana sayfa ve widget favorileri
+
+`CurrencyDialogs.kt` içindeki `HandleOnlySheet` panelin sürükleme hareketini yalnızca üst tutamaçta dinler. Listeyi kaydırmak paneli kapatmaz; üst çizgiyi aşağı çekmek kapatır, Android geri düğmesi de kullanılabilir. Ana sayfa yıldızları yeşil, widget yıldızları altın sarısıdır; sekme adları da aynı renklerle ayrılır.
 
 Ana sayfa ilk açılışta USD, EUR, TRY, GBP sırasıyla başlar. Üstteki Favoriler düğmesi aynı panelde Ana sayfa ve Widget sekmelerini açar. Ana sayfa seçimleri `home_favorites` kaydında sıralı liste olarak tutulur; en az bir birim seçili kalır. Widget seçimleri ayrı `favorites` kaydındadır ve en fazla dört birim alır. Ana sayfa seçimi widget listesini değiştirmez. Son kaynak ana sayfadan kaldırılırsa kalan ilk birim kaynak olur. Satırdaki para birimi değiştirilirse yeni liste de kaydedilir.
 

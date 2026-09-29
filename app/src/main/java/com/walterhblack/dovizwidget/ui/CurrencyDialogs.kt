@@ -3,6 +3,11 @@ package com.walterhblack.dovizwidget.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +20,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -62,10 +75,141 @@ internal fun CurrencyFlag(code: String, modifier: Modifier = Modifier) {
         "PHP" -> R.drawable.flag_ph
         "RON" -> R.drawable.flag_ro
         "ISK" -> R.drawable.flag_is
-        else -> R.drawable.ic_currency
+        "AED" -> R.drawable.flag_ae
+        "AFN" -> R.drawable.flag_af
+        "ALL" -> R.drawable.flag_al
+        "AMD" -> R.drawable.flag_am
+        "AOA" -> R.drawable.flag_ao
+        "ARS" -> R.drawable.flag_ar
+        "AWG" -> R.drawable.flag_aw
+        "AZN" -> R.drawable.flag_az
+        "BAM" -> R.drawable.flag_ba
+        "BBD" -> R.drawable.flag_bb
+        "BDT" -> R.drawable.flag_bd
+        "BHD" -> R.drawable.flag_bh
+        "BIF" -> R.drawable.flag_bi
+        "BMD" -> R.drawable.flag_bm
+        "BND" -> R.drawable.flag_bn
+        "BOB" -> R.drawable.flag_bo
+        "BSD" -> R.drawable.flag_bs
+        "BTN" -> R.drawable.flag_bt
+        "BWP" -> R.drawable.flag_bw
+        "BYN" -> R.drawable.flag_by
+        "BZD" -> R.drawable.flag_bz
+        "CDF" -> R.drawable.flag_cd
+        "CLP" -> R.drawable.flag_cl
+        "CNH" -> R.drawable.flag_cn
+        "COP" -> R.drawable.flag_co
+        "CRC" -> R.drawable.flag_cr
+        "CUP" -> R.drawable.flag_cu
+        "CVE" -> R.drawable.flag_cv
+        "DJF" -> R.drawable.flag_dj
+        "DOP" -> R.drawable.flag_do
+        "DZD" -> R.drawable.flag_dz
+        "EGP" -> R.drawable.flag_eg
+        "ERN" -> R.drawable.flag_er
+        "ETB" -> R.drawable.flag_et
+        "FJD" -> R.drawable.flag_fj
+        "FKP" -> R.drawable.flag_fk
+        "GEL" -> R.drawable.flag_ge
+        "GGP" -> R.drawable.flag_gg
+        "GHS" -> R.drawable.flag_gh
+        "GIP" -> R.drawable.flag_gi
+        "GMD" -> R.drawable.flag_gm
+        "GNF" -> R.drawable.flag_gn
+        "GTQ" -> R.drawable.flag_gt
+        "GYD" -> R.drawable.flag_gy
+        "HNL" -> R.drawable.flag_hn
+        "HTG" -> R.drawable.flag_ht
+        "IMP" -> R.drawable.flag_im
+        "IQD" -> R.drawable.flag_iq
+        "IRR" -> R.drawable.flag_ir
+        "JEP" -> R.drawable.flag_je
+        "JMD" -> R.drawable.flag_jm
+        "JOD" -> R.drawable.flag_jo
+        "KES" -> R.drawable.flag_ke
+        "KGS" -> R.drawable.flag_kg
+        "KHR" -> R.drawable.flag_kh
+        "KMF" -> R.drawable.flag_km
+        "KPW" -> R.drawable.flag_kp
+        "KWD" -> R.drawable.flag_kw
+        "KYD" -> R.drawable.flag_ky
+        "KZT" -> R.drawable.flag_kz
+        "LAK" -> R.drawable.flag_la
+        "LBP" -> R.drawable.flag_lb
+        "LKR" -> R.drawable.flag_lk
+        "LRD" -> R.drawable.flag_lr
+        "LSL" -> R.drawable.flag_ls
+        "LYD" -> R.drawable.flag_ly
+        "MAD" -> R.drawable.flag_ma
+        "MDL" -> R.drawable.flag_md
+        "MGA" -> R.drawable.flag_mg
+        "MKD" -> R.drawable.flag_mk
+        "MMK" -> R.drawable.flag_mm
+        "MNT" -> R.drawable.flag_mn
+        "MOP" -> R.drawable.flag_mo
+        "MRO" -> R.drawable.flag_mr
+        "MRU" -> R.drawable.flag_mr
+        "MUR" -> R.drawable.flag_mu
+        "MVR" -> R.drawable.flag_mv
+        "MWK" -> R.drawable.flag_mw
+        "MZN" -> R.drawable.flag_mz
+        "NAD" -> R.drawable.flag_na
+        "NGN" -> R.drawable.flag_ng
+        "NIO" -> R.drawable.flag_ni
+        "NPR" -> R.drawable.flag_np
+        "OMR" -> R.drawable.flag_om
+        "PAB" -> R.drawable.flag_pa
+        "PEN" -> R.drawable.flag_pe
+        "PGK" -> R.drawable.flag_pg
+        "PKR" -> R.drawable.flag_pk
+        "PYG" -> R.drawable.flag_py
+        "QAR" -> R.drawable.flag_qa
+        "RSD" -> R.drawable.flag_rs
+        "RUB" -> R.drawable.flag_ru
+        "RWF" -> R.drawable.flag_rw
+        "SAR" -> R.drawable.flag_sa
+        "SBD" -> R.drawable.flag_sb
+        "SCR" -> R.drawable.flag_sc
+        "SDG" -> R.drawable.flag_sd
+        "SHP" -> R.drawable.flag_sh
+        "SLE" -> R.drawable.flag_sl
+        "SOS" -> R.drawable.flag_so
+        "SRD" -> R.drawable.flag_sr
+        "SSP" -> R.drawable.flag_ss
+        "STN" -> R.drawable.flag_st
+        "SVC" -> R.drawable.flag_sv
+        "SYP" -> R.drawable.flag_sy
+        "SZL" -> R.drawable.flag_sz
+        "TJS" -> R.drawable.flag_tj
+        "TMT" -> R.drawable.flag_tm
+        "TND" -> R.drawable.flag_tn
+        "TOP" -> R.drawable.flag_to
+        "TTD" -> R.drawable.flag_tt
+        "TWD" -> R.drawable.flag_tw
+        "TZS" -> R.drawable.flag_tz
+        "UAH" -> R.drawable.flag_ua
+        "UGX" -> R.drawable.flag_ug
+        "UYU" -> R.drawable.flag_uy
+        "UZS" -> R.drawable.flag_uz
+        "VES" -> R.drawable.flag_ve
+        "VND" -> R.drawable.flag_vn
+        "VUV" -> R.drawable.flag_vu
+        "WST" -> R.drawable.flag_ws
+        "YER" -> R.drawable.flag_ye
+        "ZMW" -> R.drawable.flag_zm
+        "ZWG" -> R.drawable.flag_zw
+        else -> null
     }
-    Image(painterResource(resource), "$code bayrağı", modifier.clip(RoundedCornerShape(6.dp)),
-        contentScale = ContentScale.Crop)
+    if (resource != null) {
+        Image(painterResource(resource), "$code bayrağı", modifier.clip(RoundedCornerShape(6.dp)),
+            contentScale = ContentScale.Crop)
+    } else {
+        Box(modifier.clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest),
+            contentAlignment = Alignment.Center) {
+            Text(code, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+        }
+    }
 }
 
 private fun searchKey(value: String): String =
@@ -87,6 +231,10 @@ internal fun CurrencySelectionSheet(
     var onlyFavorites by rememberSaveable { mutableStateOf(false) }
     var widgetTab by rememberSaveable { mutableStateOf(false) }
     val managing = onSelect == null
+    val homeAccent = MaterialTheme.colorScheme.primary
+    val widgetAccent = if (MaterialTheme.colorScheme.surface.luminance() < 0.5f)
+        Color(0xFFFFC857) else Color(0xFF966000)
+    val favoriteAccent = if (managing && widgetTab) widgetAccent else homeAccent
     val activeFavorites = if (managing && widgetTab) widgetFavorites else favorites
     val toggleFavorite = if (managing && widgetTab) onWidgetFavorite else onFavorite
     val visible = remember(query, onlyFavorites, activeFavorites) {
@@ -96,14 +244,14 @@ internal fun CurrencySelectionSheet(
                 (search.isEmpty() || searchKey("$code $name").contains(search))
         }
     }
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    HandleOnlySheet(onDismiss) {
         Column(Modifier.fillMaxWidth().fillMaxHeight(0.9f).imePadding().padding(horizontal = 20.dp)) {
             Text(if (managing) "Favoriler" else "Para birimi seç",
                 style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             if (managing) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(!widgetTab, { widgetTab = false; onlyFavorites = false }, label = { Text("Ana sayfa") })
-                    FilterChip(widgetTab, { widgetTab = true; onlyFavorites = false }, label = { Text("Widget · ${widgetFavorites.size}/4") })
+                    FilterChip(!widgetTab, { widgetTab = false; onlyFavorites = false }, label = { Text("★ Ana sayfa", color = homeAccent) })
+                    FilterChip(widgetTab, { widgetTab = true; onlyFavorites = false }, label = { Text("★ Widget · ${widgetFavorites.size}/4", color = widgetAccent) })
                 }
             }
             Text(if (managing && widgetTab) "Widget için en fazla 4 para birimi seç. Değiştirmek için önce bir yıldızı kaldır."
@@ -144,7 +292,7 @@ internal fun CurrencySelectionSheet(
                             if (selected == code) Text("✓", color = MaterialTheme.colorScheme.primary)
                             IconButton(onClick = { toggleFavorite(code) }, enabled = canToggle) {
                                 Text(if (code in activeFavorites) "★" else "☆", fontSize = 26.sp,
-                                    color = if (canToggle) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    color = if (canToggle || code in activeFavorites) favoriteAccent else favoriteAccent.copy(alpha = 0.35f),
                                     modifier = Modifier.semantics {
                                         contentDescription = if (code in activeFavorites) "$code favorilerden çıkar" else "$code favorilere ekle"
                                     })
@@ -152,6 +300,45 @@ internal fun CurrencySelectionSheet(
                         }
                     }
                     Spacer(Modifier.height(4.dp))
+                }
+            }
+        }
+    }
+}
+
+// Liste kaydırması panele bağlı değildir; yalnızca üstteki tutma alanı sürüklenir.
+@Composable
+private fun HandleOnlySheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    var offset by remember { mutableFloatStateOf(0f) }
+    var panelHeight by remember { mutableIntStateOf(1) }
+    var settling by remember { mutableStateOf<Job?>(null) }
+    val scope = rememberCoroutineScope()
+    val threshold = with(LocalDensity.current) { 96.dp.toPx() }
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(
+        usePlatformDefaultWidth = false, dismissOnClickOutside = false, decorFitsSystemWindows = false)) {
+        Box(Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.BottomCenter) {
+            Surface(Modifier.widthIn(max = 640.dp).fillMaxWidth()
+                .offset { IntOffset(0, offset.roundToInt()) }.onSizeChanged { panelHeight = it.height },
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) {
+                Column {
+                    Box(Modifier.fillMaxWidth().height(40.dp)
+                        .semantics { contentDescription = "Favoriler panelini kapatmak için aşağı sürükle" }
+                        .draggable(rememberDraggableState { delta ->
+                            offset = (offset + delta).coerceIn(0f, panelHeight.toFloat())
+                        }, Orientation.Vertical,
+                            onDragStarted = { settling?.cancel() },
+                            onDragStopped = { velocity ->
+                                val close = offset > threshold || velocity > 1000f
+                                settling = scope.launch {
+                                    animate(offset, if (close) panelHeight.toFloat() else 0f,
+                                        animationSpec = tween(180)) { value, _ -> offset = value }
+                                    if (close) onDismiss()
+                                }
+                            }), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(38.dp, 4.dp).clip(RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)))
+                    }
+                    content()
                 }
             }
         }
@@ -198,9 +385,10 @@ internal fun SettingsScreen(model: ConverterViewModel, onFavorites: () -> Unit, 
                     SettingsSection("Favoriler", "Ana sayfa: ${model.homeFavorites.size} birim · Widget: ${model.favorites.size}/4") {
                         OutlinedButton(onClick = onFavorites, modifier = Modifier.fillMaxWidth()) { Text("Favorileri düzenle") }
                     }
-                    SettingsSection("Kur verileri", "Frankfurter / Avrupa Merkez Bankası günlük referans kurları. Banka alış ve satış fiyatları değildir.") {
+                    SettingsSection("Kur verileri", "Frankfurter’ın merkez bankaları ve resmî kaynaklardan derlediği kurlar. Banka alış ve satış fiyatları değildir; birimlerin kur tarihleri farklı olabilir.") {
                         Text("Desteklenen para birimi: ${currencyNames.size}", style = MaterialTheme.typography.bodyMedium)
                         model.snapshot?.let { Text("Kur tarihi: ${it.date}", style = MaterialTheme.typography.bodySmall) }
+                        model.snapshot?.let { Text("Kayıt kaynağı: ${it.source}", style = MaterialTheme.typography.bodySmall) }
                         model.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                         OutlinedButton(onClick = model::refresh, enabled = !model.loading, modifier = Modifier.fillMaxWidth()) {
                             Text(if (model.loading) "Güncelleniyor…" else "Kurları güncelle")

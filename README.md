@@ -4,7 +4,7 @@ Kotlin ile Android döviz çevirici ve ana ekran widget'ı. Android 8.0 ve üzer
 
 ## Özellikler
 
-- 29 para birimi arasında çeviri; virgül veya noktayla ondalık giriş ve dört işlem.
+- 160 para birimi arasında çeviri; virgül veya noktayla ondalık giriş ve dört işlem.
 - Kod ve isimle arama, bayraklı seçim listesi ve favori filtresi.
 - Ayrı ana sayfa ve widget favorileri; başlangıçta USD, EUR, TRY, GBP. Widget en fazla dört favori gösterir.
 - Önizlemeli ayarlar: sistem, açık ve koyu tema; küçük, normal ve büyük arayüz.
@@ -12,7 +12,7 @@ Kotlin ile Android döviz çevirici ve ana ekran widget'ı. Android 8.0 ve üzer
 - Widget'tan çeviriciyi açma ve elle yenileme; sayı girişinde kısmi güncelleme.
 - WorkManager ile yaklaşık 6 saatte bir bağlantı uygunsa güncelleme; kesin zaman garantisi yok.
 
-Veri: [Frankfurter v2](https://frankfurter.dev/), ECB sağlayıcısı. **Günlük referans kurlarıdır; anlık banka alış/satış fiyatları değildir.** API anahtarı gerekmez. Hafta sonu ve tatillerde son yayımlanan iş günü kuru kullanılabilir.
+Veri: [Frankfurter v2](https://frankfurter.dev/), merkez bankaları ve resmî kaynaklardan derlenen referans kurlar. **Anlık banka alış/satış fiyatları değildir.** API anahtarı gerekmez. Birimlerin kur tarihleri farklı olabilir; uygulama kaydın tarih aralığını gösterir. Hafta sonu ve tatillerde son yayımlanan kur kullanılabilir.
 
 ## Dosyaları öğren
 

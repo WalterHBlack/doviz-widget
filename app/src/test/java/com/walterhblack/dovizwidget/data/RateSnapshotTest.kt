@@ -29,7 +29,9 @@ class RateSnapshotTest {
         "PHP" to "2.5",
         "RON" to "2.5",
         "ISK" to "2.5",
-    )
+    ).apply {
+        currencyNames.keys.filter { it != "EUR" }.forEach { putIfAbsent(it, "2.5") }
+    }
     private val valid = org.json.JSONArray().apply {
         fixtureRates.forEach { (code, rate) ->
             put(org.json.JSONObject().put("date", "2026-09-18").put("base", "EUR")
@@ -54,8 +56,12 @@ class RateSnapshotTest {
     @Test(expected = IllegalArgumentException::class) fun incompleteResponseCannotReplaceGoodCache() {
         RateSnapshot.fromResponse("[]", 123L)
     }
-    @Test(expected = IllegalArgumentException::class) fun differentDatesCannotBeCombined() {
-        RateSnapshot.fromResponse(valid.replaceFirst("2026-09-18", "2026-09-17"), 123L)
+    @Test fun differentDatesArePreserved() {
+        val value = RateSnapshot.fromResponse(valid.replaceFirst("2026-09-18", "2026-09-17"), 123L)
+        assertEquals("2026-09-17 – 2026-09-18", value.date)
+        assertEquals("2026-09-17", value.rateDates["USD"])
+        assertEquals("2026-09-18", value.rateDates["TRY"])
+        assertEquals(value, RateSnapshot.decode(value.encode()))
     }
     @Test(expected = IllegalArgumentException::class) fun negativeRateCannotBeCached() {
         RateSnapshot.fromResponse(valid.replace("55.9077", "-55"), 123L)

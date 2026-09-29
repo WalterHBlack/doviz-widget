@@ -4,26 +4,26 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <LinearLayout
-        android:id="@+id/widget_row_try"
+        android:id="@+id/widget_row_0"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/widget_content_try"
+            android:id="@+id/widget_content_0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <TextView
-                android:id="@+id/widget_code_try"
+                android:id="@+id/widget_code_0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="TRY"
+                android:text=""
                 android:textColor="#A5F3CF"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/widget_value_try"
+                android:id="@+id/widget_value_0"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -32,7 +32,7 @@
                 android:ellipsize="end"
                 android:textColor="#F0FFF7" />
             <TextView
-                android:id="@+id/widget_target_try"
+                android:id="@+id/widget_target_0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -44,26 +44,26 @@
             android:background="#2B3C32" />
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/widget_row_usd"
+        android:id="@+id/widget_row_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/widget_content_usd"
+            android:id="@+id/widget_content_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <TextView
-                android:id="@+id/widget_code_usd"
+                android:id="@+id/widget_code_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="USD"
+                android:text=""
                 android:textColor="#A5F3CF"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/widget_value_usd"
+                android:id="@+id/widget_value_1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -72,7 +72,7 @@
                 android:ellipsize="end"
                 android:textColor="#F0FFF7" />
             <TextView
-                android:id="@+id/widget_target_usd"
+                android:id="@+id/widget_target_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -84,26 +84,26 @@
             android:background="#2B3C32" />
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/widget_row_eur"
+        android:id="@+id/widget_row_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/widget_content_eur"
+            android:id="@+id/widget_content_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <TextView
-                android:id="@+id/widget_code_eur"
+                android:id="@+id/widget_code_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="EUR"
+                android:text=""
                 android:textColor="#A5F3CF"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/widget_value_eur"
+                android:id="@+id/widget_value_2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -112,7 +112,7 @@
                 android:ellipsize="end"
                 android:textColor="#F0FFF7" />
             <TextView
-                android:id="@+id/widget_target_eur"
+                android:id="@+id/widget_target_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -124,26 +124,26 @@
             android:background="#2B3C32" />
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/widget_row_gbp"
+        android:id="@+id/widget_row_3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/widget_content_gbp"
+            android:id="@+id/widget_content_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
             <TextView
-                android:id="@+id/widget_code_gbp"
+                android:id="@+id/widget_code_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
-                android:text="GBP"
+                android:text=""
                 android:textColor="#A5F3CF"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/widget_value_gbp"
+                android:id="@+id/widget_value_3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -152,1007 +152,7 @@
                 android:ellipsize="end"
                 android:textColor="#F0FFF7" />
             <TextView
-                android:id="@+id/widget_target_gbp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_jpy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_jpy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_jpy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="JPY"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_jpy"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_jpy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_chf"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_chf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_chf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="CHF"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_chf"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_chf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_cad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_cad"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_cad"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="CAD"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_cad"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_cad"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_aud"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_aud"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_aud"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="AUD"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_aud"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_aud"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_cny"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_cny"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_cny"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="CNY"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_cny"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_cny"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_inr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_inr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_inr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="INR"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_inr"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_inr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_nok"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_nok"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_nok"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="NOK"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_nok"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_nok"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_sek"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_sek"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_sek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="SEK"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_sek"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_sek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_dkk"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_dkk"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_dkk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="DKK"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_dkk"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_dkk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_pln"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_pln"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_pln"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="PLN"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_pln"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_pln"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_czk"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_czk"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_czk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="CZK"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_czk"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_czk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_huf"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_huf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_huf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="HUF"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_huf"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_huf"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_nzd"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_nzd"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_nzd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="NZD"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_nzd"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_nzd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_sgd"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_sgd"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_sgd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="SGD"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_sgd"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_sgd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_hkd"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_hkd"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_hkd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="HKD"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_hkd"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_hkd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_zar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_zar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_zar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="ZAR"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_zar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_zar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_krw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_krw"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_krw"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="KRW"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_krw"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_krw"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_brl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_brl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_brl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="BRL"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_brl"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_brl"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_mxn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_mxn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_mxn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="MXN"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_mxn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_mxn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_thb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_thb"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_thb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="THB"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_thb"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_thb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_idr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_idr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_idr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="IDR"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_idr"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_idr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_myr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_myr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_myr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="MYR"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_myr"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_myr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_php"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_php"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_php"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="PHP"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_php"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_php"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_ron"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_ron"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_ron"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="RON"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_ron"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_ron"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:textColor="#96ABA0" />
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2B3C32" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/widget_row_isk"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/widget_content_isk"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/widget_code_isk"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:text="ISK"
-                android:textColor="#A5F3CF"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/widget_value_isk"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:textColor="#F0FFF7" />
-            <TextView
-                android:id="@+id/widget_target_isk"
+                android:id="@+id/widget_target_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"

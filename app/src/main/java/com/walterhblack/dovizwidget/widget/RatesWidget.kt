@@ -40,7 +40,7 @@ private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
 private val targetPageKey = intPreferencesKey("target_page")
 private val favoritesPageKey = intPreferencesKey("favorites_page")
 private val keyParameter = ActionParameters.Key<String>("calculator_key")
-private val partialInputParameter = ActionParameters.Key<Boolean>("partial_input_v1")
+private val partialInputParameter = ActionParameters.Key<Boolean>("partial_input_v2")
 private val calculatorInputLock = Mutex()
 // Kısmi güncellemeden sonra açık Glance oturumu boyut değiştirirse son girdiyi
 // kullanır. Kalıcı kaynak DataStore'dur; bu önbellek yalnızca oturum içindir.
@@ -154,8 +154,7 @@ class RatesWidget : GlanceAppWidget() {
                         .padding(horizontal = 16.dp * scale, vertical = 4.dp * scale)
                 ) {
                     val choosingTarget = inputState[choosingTargetKey] == true
-                    val pageSize = if (choosingTarget) 10 else
-                        ((size.height.value / scale - 290f) / 40f).toInt().coerceIn(1, 8)
+                    val pageSize = if (choosingTarget) 10 else 4
                     val codes = currencyNames.keys.filter { choosingTarget || it in favorites }
                     val pages = codes.chunked(pageSize).ifEmpty { listOf(emptyList()) }
                     val page = (inputState[if (choosingTarget) targetPageKey else favoritesPageKey] ?: 0)
@@ -262,10 +261,12 @@ class CalculatorAction : ActionCallback {
                 !key.startsWith("target") && !key.startsWith("page:") && glanceId is AppWidgetId) {
                 val snapshot = updatedState[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
                     ?: RateRepository(context).cached()
+                val favorites = updatedState[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()
+                    ?: RateRepository(context).favorites()
                 try {
                     updateWidgetValues(context, glanceId.appWidgetId,
                         updatedState[expressionKey] ?: "1",
-                        updatedState[targetKey]?.takeIf { it in currencyNames } ?: "TRY", snapshot)
+                        updatedState[targetKey]?.takeIf { it in currencyNames } ?: "TRY", snapshot, favorites)
                 } catch (_: RuntimeException) {
                     RatesWidget().update(context, glanceId)
                 }
