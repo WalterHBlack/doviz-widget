@@ -22,6 +22,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.layout.*
 import androidx.glance.text.*
 import androidx.glance.unit.ColorProvider
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import androidx.work.*
@@ -34,13 +35,10 @@ private val snapshotKey = stringPreferencesKey("snapshot")
 private val favoritesKey = stringPreferencesKey("favorites")
 private val statusKey = stringPreferencesKey("status")
 private val expressionKey = stringPreferencesKey("calculator_expression")
-private val targetKey = stringPreferencesKey("calculator_target")
-private val choosingTargetKey = booleanPreferencesKey("choosing_target")
+private val sourceKey = stringPreferencesKey("calculator_source")
 private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
-private val targetPageKey = intPreferencesKey("target_page")
-private val favoritesPageKey = intPreferencesKey("favorites_page")
 private val keyParameter = ActionParameters.Key<String>("calculator_key")
-private val partialInputParameter = ActionParameters.Key<Boolean>("partial_input_v2")
+private val partialInputParameter = ActionParameters.Key<Boolean>("partial_input_v3")
 private val calculatorInputLock = Mutex()
 // Kısmi güncellemeden sonra açık Glance oturumu boyut değiştirirse son girdiyi
 // kullanır. Kalıcı kaynak DataStore'dur; bu önbellek yalnızca oturum içindir.
@@ -103,8 +101,9 @@ class RatesWidget : GlanceAppWidget() {
             val inputState = calculatorStates[id] ?: state
             val snapshot = state[snapshotKey]?.let { WidgetSnapshotCache.get(it) } ?: initialSnapshot
             val favorites = state[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet() ?: initialFavorites
-            val expression = inputState[expressionKey] ?: "1"
-            val target = inputState[targetKey]?.takeIf { it in currencyNames } ?: "TRY"
+            val expression = inputState[expressionKey] ?: "0,00"
+            val source = inputState[sourceKey]?.takeIf { it in favorites }
+                ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD"
             val size = LocalSize.current
             // Bazı launcher'lar XML'deki minimum yüksekliği daha küçük bir alana sıkıştırır.
             // Ölçeği gerçek yüksekliğe göre düşürerek son klavye satırını dışarı taşırmayız.
@@ -126,70 +125,9 @@ class RatesWidget : GlanceAppWidget() {
                     }
                     Text("↗", style = TextStyle(color = accent, fontSize = (17f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
                 }
-                Row(
-                    GlanceModifier.fillMaxWidth().height(62.dp * scale).background(widgetSurface)
-                        .padding(horizontal = 16.dp * scale),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(GlanceModifier.defaultWeight()) {
-                        Text("Tutar", style = TextStyle(color = muted, fontSize = (10f * scale).sp))
-                        AndroidRemoteViews(expressionViews(context, expression, scale),
-                            modifier = GlanceModifier.fillMaxWidth())
-                    }
-                    Box(
-                        GlanceModifier
-                            .padding(horizontal = 10.dp * scale, vertical = 8.dp * scale)
-                            .clickable(calculatorAction("target")),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text("Hedef", style = TextStyle(color = muted, fontSize = (10f * scale).sp))
-                            Text("$target ▾", style = TextStyle(color = accent, fontSize = (16f * scale).sp, fontWeight = FontWeight.Bold), maxLines = 1)
-                        }
-                    }
-                }
-                Spacer(GlanceModifier.height(sectionGap))
-                Column(
-                    GlanceModifier.fillMaxWidth().defaultWeight()
-                        .padding(horizontal = 16.dp * scale, vertical = 4.dp * scale)
-                ) {
-                    val choosingTarget = inputState[choosingTargetKey] == true
-                    val pageSize = if (choosingTarget) 10 else 4
-                    val codes = currencyNames.keys.filter { choosingTarget || it in favorites }
-                    val pages = codes.chunked(pageSize).ifEmpty { listOf(emptyList()) }
-                    val page = (inputState[if (choosingTarget) targetPageKey else favoritesPageKey] ?: 0)
-                        .coerceIn(0, pages.lastIndex)
-                    if (choosingTarget) {
-                        pages[page].chunked(5).forEach { codes ->
-                            Row(GlanceModifier.fillMaxWidth().height(40.dp * scale)) {
-                                codes.forEach { code ->
-                                    Box(GlanceModifier.defaultWeight().fillMaxHeight()
-                                        .clickable(calculatorAction("target:$code")), contentAlignment = Alignment.Center) {
-                                        Text(code, style = TextStyle(color = accent, fontSize = (12f * scale).sp), maxLines = 1)
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        AndroidRemoteViews(valueViews(context, expression, target, snapshot, pages[page].toSet(), scale),
-                            modifier = GlanceModifier.fillMaxWidth())
-                    }
-                    if (pages.size > 1) {
-                        Row(GlanceModifier.fillMaxWidth().height(28.dp * scale),
-                            verticalAlignment = Alignment.CenterVertically) {
-                            Box(GlanceModifier.defaultWeight().fillMaxHeight()
-                                .clickable(calculatorAction("page:${(page - 1 + pages.size) % pages.size}")),
-                                contentAlignment = Alignment.Center) {
-                                Text("‹ Önceki", style = TextStyle(color = accent, fontSize = (12f * scale).sp))
-                            }
-                            Text("${page + 1}/${pages.size}", style = TextStyle(color = muted, fontSize = (10f * scale).sp))
-                            Box(GlanceModifier.defaultWeight().fillMaxHeight()
-                                .clickable(calculatorAction("page:${(page + 1) % pages.size}")),
-                                contentAlignment = Alignment.Center) {
-                                Text("Sonraki ›", style = TextStyle(color = accent, fontSize = (12f * scale).sp))
-                            }
-                        }
-                    }
+                Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
+                    AndroidRemoteViews(valueViews(context, expression, source, snapshot, favorites, scale,
+                        (id as AppWidgetId).appWidgetId), modifier = GlanceModifier.fillMaxWidth())
                 }
                 Spacer(GlanceModifier.height(sectionGap))
                 Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
@@ -209,7 +147,7 @@ class RatesWidget : GlanceAppWidget() {
                             row.forEach { key ->
                                 WidgetKey(key, GlanceModifier.defaultWeight().fillMaxHeight(),
                                     if (key == "↻") actionRunCallback<RefreshAction>()
-                                    else calculatorAction(key, inputState[choosingTargetKey] != true), scale)
+                                    else calculatorAction(key), scale)
                             }
                         }
                     }
@@ -223,21 +161,18 @@ class CalculatorAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         calculatorInputLock.withLock {
             val key = parameters[keyParameter] ?: return
-            var wasChoosingTarget = false
             lateinit var updatedState: Preferences
             updateAppWidgetState(context, glanceId) { state ->
-                wasChoosingTarget = state[choosingTargetKey] == true
-                val expression = state[expressionKey] ?: "1"
+                val expression = state[expressionKey] ?: "0,00"
                 when {
-                    key.startsWith("page:") -> {
-                        val pageKey = if (wasChoosingTarget) targetPageKey else favoritesPageKey
-                        state[pageKey] = key.removePrefix("page:").toIntOrNull()?.coerceAtLeast(0) ?: 0
-                    }
-                    key == "target" -> state[choosingTargetKey] = !(state[choosingTargetKey] ?: false)
-                    key.startsWith("target:") -> {
-                        val code = key.removePrefix("target:")
-                        if (code in currencyNames) state[targetKey] = code
-                        state[choosingTargetKey] = false
+                    key.startsWith("source:") -> {
+                        val code = key.removePrefix("source:")
+                        val favorites = state[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()
+                            ?: RateRepository(context).favorites()
+                        if (code in favorites) {
+                            state[sourceKey] = code
+                            state[evaluatedKey] = true
+                        }
                     }
                     key == "=" -> {
                         runCatching { WidgetCalculator.evaluate(expression) }.getOrNull()?.let {
@@ -249,24 +184,22 @@ class CalculatorAction : ActionCallback {
                         val fresh = (state[evaluatedKey] ?: true) && (key.firstOrNull()?.isDigit() == true || key == ",")
                         state[expressionKey] = WidgetCalculator.edit(if (fresh) "0" else expression, key)
                         state[evaluatedKey] = false
-                        state[choosingTargetKey] = false
                     }
                 }
                 updatedState = state.toPreferences()
             }
             calculatorStates[glanceId] = updatedState
-            // Eski APK'nın düğmeleri yeni XML kimliklerini içermez: ilk basışta tam
-            // güncelleme yapılır. Hedef menüsü de görünüm yapısını değiştirdiğinden tamdır.
-            if (parameters[partialInputParameter] == true && !wasChoosingTarget &&
-                !key.startsWith("target") && !key.startsWith("page:") && glanceId is AppWidgetId) {
+            // Eski APK'daki tuş ilk basışta yeni satır düzenini kurar.
+            if (parameters[partialInputParameter] == true && glanceId is AppWidgetId) {
                 val snapshot = updatedState[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
                     ?: RateRepository(context).cached()
                 val favorites = updatedState[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()
                     ?: RateRepository(context).favorites()
                 try {
                     updateWidgetValues(context, glanceId.appWidgetId,
-                        updatedState[expressionKey] ?: "1",
-                        updatedState[targetKey]?.takeIf { it in currencyNames } ?: "TRY", snapshot, favorites)
+                        updatedState[expressionKey] ?: "0,00",
+                        updatedState[sourceKey]?.takeIf { it in favorites }
+                            ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD", snapshot, favorites)
                 } catch (_: RuntimeException) {
                     RatesWidget().update(context, glanceId)
                 }
@@ -306,4 +239,18 @@ suspend fun publishWidgetState(context: Context, status: String = "") {
         }
     }
     RatesWidget().updateAll(context)
+}
+class SelectWidgetSourceReceiver : android.content.BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: android.content.Intent) {
+        val id = intent.getIntExtra("widget_id", -1)
+        val code = intent.getStringExtra("source") ?: return
+        if (id < 0 || code !in currencyNames) return
+        val pending = goAsync()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                CalculatorAction().onAction(context, AppWidgetId(id),
+                    actionParametersOf(keyParameter to "source:$code", partialInputParameter to true))
+            } finally { pending.finish() }
+        }
+    }
 }

@@ -15,6 +15,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".widget.SelectWidgetSourceReceiver" android:exported="false" />
         <receiver android:name=".widget.RatesWidgetReceiver" android:exported="false"
             android:label="@string/app_name">
             <intent-filter>

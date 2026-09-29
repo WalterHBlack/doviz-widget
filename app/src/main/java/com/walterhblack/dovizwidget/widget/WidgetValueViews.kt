@@ -44,6 +44,7 @@ internal fun valueViews(
     snapshot: RateSnapshot?,
     favorites: Set<String>,
     scale: Float,
+    appWidgetId: Int,
 ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_values).apply {
     val density = context.resources.displayMetrics.density
     val verticalPadding = (8f * scale * density).roundToInt()
@@ -53,12 +54,20 @@ internal fun valueViews(
         val code = codes.getOrNull(index)
         setViewVisibility(row.row, if (code != null) View.VISIBLE else View.GONE)
         setTextViewText(row.codeView, code.orEmpty())
-        setViewPadding(row.content, 0, verticalPadding, 0, verticalPadding)
+        setViewPadding(row.content, (16f * scale * density).roundToInt(), verticalPadding,
+            (16f * scale * density).roundToInt(), verticalPadding)
         setViewPadding(row.target, targetPadding, 0, 0, 0)
         setTextViewTextSize(row.codeView, TypedValue.COMPLEX_UNIT_SP, 15f * scale)
         setTextViewTextSize(row.value, TypedValue.COMPLEX_UNIT_SP, 18f * scale)
         setTextViewTextSize(row.target, TypedValue.COMPLEX_UNIT_SP, 10f * scale)
-        setTextViewText(row.target, target)
+        setTextViewText(row.target, code.orEmpty())
+        if (code != null) {
+            val intent = android.content.Intent(context, SelectWidgetSourceReceiver::class.java)
+                .setData(android.net.Uri.parse("doviz://widget/$appWidgetId/source/$code"))
+                .putExtra("widget_id", appWidgetId).putExtra("source", code)
+            setOnClickPendingIntent(row.row, android.app.PendingIntent.getBroadcast(context, 0, intent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE))
+        }
     }
     setViewVisibility(R.id.widget_empty, if (favorites.isEmpty()) View.VISIBLE else View.GONE)
     setTextViewTextSize(R.id.widget_calculation_message, TypedValue.COMPLEX_UNIT_SP, 11f * scale)
@@ -75,8 +84,7 @@ internal fun updateWidgetValues(
     snapshot: RateSnapshot?,
     favorites: Set<String>,
 ) {
-    val patch = RemoteViews(context.packageName, R.layout.widget_expression).apply {
-        setTextViewText(R.id.widget_expression, expression)
+    val patch = RemoteViews(context.packageName, R.layout.widget_values).apply {
         applyValues(expression, target, snapshot, favorites)
     }
     AppWidgetManager.getInstance(context).partiallyUpdateAppWidget(appWidgetId, patch)
@@ -91,12 +99,18 @@ private fun RemoteViews.applyValues(expression: String, target: String, snapshot
         val converted = amount?.let { value ->
             if (code == target) value else if (code == null) null else snapshot?.let {
                 runCatching {
-                    val positive = CurrencyMath.convert(value.abs(), code, target, it.rates)
+                    val positive = CurrencyMath.convert(value.abs(), target, code, it.rates)
                     if (value.signum() < 0) positive.negate() else positive
                 }.getOrNull()
             }
         }
-        setTextViewText(row.value, converted?.let { CurrencyMath.format(it) } ?: "—")
+        val selected = code == target
+        setTextViewText(row.value, if (selected) expression else converted?.let { CurrencyMath.format(it) } ?: "—")
+        setInt(row.content, "setBackgroundColor", android.graphics.Color.parseColor(if (selected) "#18392E" else "#101B17"))
+        val color = android.graphics.Color.parseColor(if (selected) "#A5F3CF" else "#F0FFF7")
+        setTextColor(row.codeView, color)
+        setTextColor(row.value, color)
+        setContentDescription(row.row, "${code.orEmpty()}${if (selected) ", kaynak para birimi" else ", kaynak olarak seç"}")
     }
     val message = when {
         calculation.isFailure -> calculation.exceptionOrNull()?.message ?: "İşlemi tamamla."
