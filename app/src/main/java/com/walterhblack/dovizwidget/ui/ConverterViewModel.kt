@@ -76,6 +76,13 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
         updateHomeFavorites(updated)
     }
 
+    fun moveHomeCurrency(code: String, targetCode: String) {
+        val from = homeFavorites.indexOf(code)
+        val to = homeFavorites.indexOf(targetCode)
+        if (from < 0 || to < 0 || from == to) return
+        updateHomeFavorites(homeFavorites.toMutableList().apply { add(to, removeAt(from)) })
+    }
+
     private fun updateHomeFavorites(codes: List<String>) {
         homeFavorites = codes
         repository.setHomeFavorites(codes)

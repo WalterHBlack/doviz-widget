@@ -101,6 +101,8 @@ Yeni para birimi eklerken servis desteği, katalog ve bayrak eşlemesi birlikte 
 
 ## Ana sayfa ve widget favorileri
 
+Kur satırına uzun basıp sürüklemek sıralamayı değiştirir. `ConverterScreen.kt` satır konumlarını ve sürüklenen satırı izler; `ConverterViewModel.moveHomeCurrency` yeni sırayı `home_favorites` kaydına yazar. Seçili kaynak ve widget favorileri bu işlemden etkilenmez. Güncelleme zamanı kur listesinin altında gösterilir.
+
 Ana sayfanın kur listesi `ConverterScreen.kt` içinde çerçevesiz ve tam genişlikte çizilir. Seçilen satır köşeleri düz yeşil bir şerittir; diğer satırlar sayfanın arka planını kullanır. Satır içindeki yazı ve bayrak boşlukları korunur.
 
 `CurrencyDialogs.kt` içindeki `HandleOnlySheet` panelin sürükleme hareketini yalnızca üst tutamaçta dinler. Listeyi kaydırmak paneli kapatmaz; üst çizgiyi aşağı çekmek kapatır, Android geri düğmesi de kullanılabilir. Ana sayfa yıldızları yeşil, widget yıldızları altın sarısıdır; sekme adları da aynı renklerle ayrılır.

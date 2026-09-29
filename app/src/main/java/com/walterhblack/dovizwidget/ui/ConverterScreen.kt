@@ -6,6 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -91,6 +95,18 @@ fun ConverterScreen(model: ConverterViewModel) {
             var amount by remember { mutableStateOf("0,00") }
             val from = model.sourceCurrency
             val rowCodes = model.homeFavorites
+            val rowHeights = remember { mutableStateMapOf<String, Int>() }
+            val dividerPx = with(LocalDensity.current) { 0.7.dp.roundToPx().toFloat() }
+            val rowBounds by rememberUpdatedState(buildMap<String, Pair<Float, Float>> {
+                var top = 0f
+                rowCodes.forEach { code ->
+                    val height = rowHeights[code]?.toFloat() ?: 0f
+                    put(code, top to top + height)
+                    top += height + dividerPx
+                }
+            })
+            var draggedCode by remember { mutableStateOf<String?>(null) }
+            var draggedCenter by remember { mutableFloatStateOf(0f) }
             var keyboardMode by rememberSaveable { mutableStateOf(KeyboardMode.Docked) }
             val calculation = runCatching { WidgetCalculator.evaluate(amount) }
             val parsed = calculation.getOrNull()
@@ -182,14 +198,6 @@ fun ConverterScreen(model: ConverterViewModel) {
                               style = MaterialTheme.typography.labelLarge,
                               letterSpacing = 1.4.sp
                           )
-                          Text(
-                              snapshot?.let {
-                                  "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
-                                      .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
-                              } ?: "Güncel kurlar yükleniyor",
-                              color = colors.onSurfaceVariant,
-                              style = MaterialTheme.typography.bodySmall
-                          )
                       }
                       TextButton(
                           onClick = { manageCurrencies = true },
@@ -213,8 +221,35 @@ fun ConverterScreen(model: ConverterViewModel) {
                   Column(
                       Modifier.fillMaxWidth()
                           .background(listSurfaceColor)
+                          .pointerInput(model) {
+                              detectDragGesturesAfterLongPress(
+                                  onDragStart = { point ->
+                                      draggedCode = model.homeFavorites.firstOrNull { code ->
+                                          rowBounds[code]?.let { point.y >= it.first && point.y <= it.second } == true
+                                      }
+                                      draggedCode?.let { code ->
+                                          rowBounds[code]?.let { draggedCenter = (it.first + it.second) / 2f }
+                                      }
+                                  },
+                                  onDragEnd = { draggedCode = null },
+                                  onDragCancel = { draggedCode = null },
+                                  onDrag = { change, delta ->
+                                      draggedCode?.let { code ->
+                                          change.consume()
+                                          draggedCenter += delta.y
+                                          val target = model.homeFavorites.firstOrNull { other ->
+                                              other != code && rowBounds[other]?.let {
+                                                  draggedCenter >= it.first && draggedCenter <= it.second
+                                              } == true
+                                          }
+                                          if (target != null) model.moveHomeCurrency(code, target)
+                                      }
+                                  }
+                              )
+                          }
                   ) {
                   rowCodes.forEachIndexed { index, code ->
+                    key(code) {
                       val isSource = code == from
                       val converted = parsed?.let { value ->
                           if (isSource) value else snapshot?.let {
@@ -226,6 +261,14 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                       Row(
                           Modifier.fillMaxWidth()
+                              .onSizeChanged { rowHeights[code] = it.height }
+                              .zIndex(if (draggedCode == code) 1f else 0f)
+                              .graphicsLayer {
+                                  translationY = if (draggedCode == code) {
+                                      rowBounds[code]?.let { draggedCenter - (it.first + it.second) / 2f } ?: 0f
+                                  } else 0f
+                                  shadowElevation = if (draggedCode == code) 8.dp.toPx() else 0f
+                              }
                               .background(if (isSource) selectedRowColor else listSurfaceColor)
                               .clickable {
                                   model.setSelectedSourceCurrency(code)
@@ -262,6 +305,13 @@ fun ConverterScreen(model: ConverterViewModel) {
                       }
                   }
                   }
+                  }
+                  Text(snapshot?.let {
+                      "Güncellendi · " + DateTimeFormatter.ofPattern("HH:mm · dd.MM.yyyy", Locale.forLanguageTag("tr-TR"))
+                          .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(it.fetchedAt))
+                  } ?: "Güncel kurlar yükleniyor",
+                      modifier = Modifier.padding(horizontal = 16.dp * uiScale),
+                      style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                   Text("Satıra dokununca kaynak kur değişir · Günlük referans kurları",
                       modifier = Modifier.padding(horizontal = 16.dp * uiScale),
                       style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
