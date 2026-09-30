@@ -45,9 +45,10 @@ internal fun valueViews(
     favorites: Set<String>,
     scale: Float,
     appWidgetId: Int,
+    rowPadding: Float,
 ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_values).apply {
     val density = context.resources.displayMetrics.density
-    val verticalPadding = (8f * scale * density).roundToInt()
+    val verticalPadding = (rowPadding * density).roundToInt()
     val targetPadding = (6f * scale * density).roundToInt()
     val codes = currencyNames.keys.filter { it in favorites }.take(4)
     valueRows.forEachIndexed { index, row ->
@@ -71,6 +72,8 @@ internal fun valueViews(
     }
     setViewVisibility(R.id.widget_empty, if (favorites.isEmpty()) View.VISIBLE else View.GONE)
     setTextViewTextSize(R.id.widget_calculation_message, TypedValue.COMPLEX_UNIT_SP, 11f * scale)
+    setInt(R.id.widget_calculation_message, "setMaxLines", 2)
+    setTextViewTextSize(R.id.widget_empty, TypedValue.COMPLEX_UNIT_SP, 12f * scale)
     applyValues(expression, target, snapshot, favorites)
 }
 

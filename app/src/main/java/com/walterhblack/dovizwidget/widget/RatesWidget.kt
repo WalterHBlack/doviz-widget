@@ -105,13 +105,21 @@ class RatesWidget : GlanceAppWidget() {
             val source = inputState[sourceKey]?.takeIf { it in favorites }
                 ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD"
             val size = LocalSize.current
-            // Bazı launcher'lar XML'deki minimum yüksekliği daha küçük bir alana sıkıştırır.
-            // Ölçeği gerçek yüksekliğe göre düşürerek son klavye satırını dışarı taşırmayız.
-            val widthScale = size.width.value / 300f
-            val heightScale = size.height.value / 460f
-            val scale = min(widthScale, heightScale).coerceIn(0.58f, 1.65f)
-            // Dört klavye satırı, 220x320 dp'lik minimum widget'ta da tamamen görünür.
-            val keyHeight = 36.dp * scale
+            // Önce dört tuş satırı, favoriler ve iki satırlık hata mesajı için yer ayır.
+            // Sistem yazı büyüklüğü de ölçüye katılır; küçük yüzeylerde alt ölçek sınırı yoktur.
+            val fontScale = context.resources.configuration.fontScale.coerceAtLeast(1f)
+            val rowCount = favorites.size.coerceAtLeast(1)
+            val baseKeyHeight = maxOf(42f, 28f * fontScale)
+            val baseHeight = (26f * fontScale + 20f) + rowCount * (26f * fontScale + 16f) +
+                (32f * fontScale + 8f) + (16f * fontScale + 8f) + baseKeyHeight * 4f
+            val availableHeight = (size.height.value - rowCount - 4f).coerceAtLeast(1f)
+            val scale = min(size.width.value / (300f * fontScale), availableHeight / baseHeight)
+                .coerceAtMost(1.8f).coerceAtLeast(0.01f)
+            val spareHeight = (availableHeight - baseHeight * scale).coerceAtLeast(0f)
+            val keyExtra = min(spareHeight / 8f, 24f * scale)
+            val rowExtraPadding = min((spareHeight - keyExtra * 4f) / (rowCount * 2f), 16f * scale)
+            val keyHeight = (baseKeyHeight * scale + keyExtra).dp
+            val rowPadding = 8f * scale + rowExtraPadding
             val sectionGap = 4.dp * scale
             Column(GlanceModifier.fillMaxSize().background(widgetBackground)) {
                 Row(
@@ -127,7 +135,7 @@ class RatesWidget : GlanceAppWidget() {
                 }
                 Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     AndroidRemoteViews(valueViews(context, expression, source, snapshot, favorites, scale,
-                        (id as AppWidgetId).appWidgetId), modifier = GlanceModifier.fillMaxWidth())
+                        (id as AppWidgetId).appWidgetId, rowPadding), modifier = GlanceModifier.fillMaxWidth())
                 }
                 Spacer(GlanceModifier.height(sectionGap))
                 Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
