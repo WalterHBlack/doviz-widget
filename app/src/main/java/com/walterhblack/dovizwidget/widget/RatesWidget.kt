@@ -33,6 +33,7 @@ import kotlin.math.min
 
 private val snapshotKey = stringPreferencesKey("snapshot")
 private val favoritesKey = stringPreferencesKey("favorites")
+private val decimalPlacesKey = intPreferencesKey("decimal_places")
 private val statusKey = stringPreferencesKey("status")
 private val expressionKey = stringPreferencesKey("calculator_expression")
 private val sourceKey = stringPreferencesKey("calculator_source")
@@ -102,6 +103,7 @@ class RatesWidget : GlanceAppWidget() {
             val snapshot = state[snapshotKey]?.let { WidgetSnapshotCache.get(it) } ?: initialSnapshot
             val favorites = state[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet() ?: initialFavorites
             val expression = inputState[expressionKey] ?: "0,00"
+            val decimals = state[decimalPlacesKey] ?: repository.decimalPlaces()
             val source = inputState[sourceKey]?.takeIf { it in favorites }
                 ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD"
             val size = LocalSize.current
@@ -135,7 +137,8 @@ class RatesWidget : GlanceAppWidget() {
                 }
                 Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     AndroidRemoteViews(valueViews(context, expression, source, snapshot, favorites, scale,
-                        (id as AppWidgetId).appWidgetId, rowPadding), modifier = GlanceModifier.fillMaxWidth())
+                        (id as AppWidgetId).appWidgetId, rowPadding, decimals,
+                        inputState[evaluatedKey] ?: true), modifier = GlanceModifier.fillMaxWidth())
                 }
                 Spacer(GlanceModifier.height(sectionGap))
                 Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
@@ -201,6 +204,19 @@ class CalculatorAction : ActionCallback {
                             state[evaluatedKey] = true
                         }
                     }
+                    key == "⌫" && (state[evaluatedKey] ?: true) -> {
+                        val decimals = state[decimalPlacesKey] ?: RateRepository(context).decimalPlaces()
+                        val visible = runCatching {
+                            WidgetCalculator.evaluate(expression).setScale(decimals, java.math.RoundingMode.HALF_UP)
+                                .toPlainString().replace('.', ',').replace('-', '−')
+                        }.getOrDefault(expression)
+                        state[expressionKey] = WidgetCalculator.edit(visible, key)
+                        state[evaluatedKey] = false
+                    }
+                    key == "C" -> {
+                        state[expressionKey] = "0"
+                        state[evaluatedKey] = true
+                    }
                     else -> {
                         val fresh = (state[evaluatedKey] ?: true) && (key.firstOrNull()?.isDigit() == true || key == ",")
                         state[expressionKey] = WidgetCalculator.edit(if (fresh) "0" else expression, key)
@@ -220,7 +236,9 @@ class CalculatorAction : ActionCallback {
                     updateWidgetValues(context, glanceId.appWidgetId,
                         updatedState[expressionKey] ?: "0,00",
                         updatedState[sourceKey]?.takeIf { it in favorites }
-                            ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD", snapshot, favorites)
+                            ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD", snapshot, favorites,
+                        updatedState[decimalPlacesKey] ?: RateRepository(context).decimalPlaces(),
+                        updatedState[evaluatedKey] ?: true)
                 } catch (_: RuntimeException) {
                     RatesWidget().update(context, glanceId)
                 }
@@ -256,6 +274,7 @@ suspend fun publishWidgetState(context: Context, status: String = "") {
         updateAppWidgetState(context, id) { prefs ->
             repository.cached()?.let { prefs[snapshotKey] = it.encode() }
             prefs[favoritesKey] = repository.favorites().joinToString(",")
+            prefs[decimalPlacesKey] = repository.decimalPlaces()
             prefs[statusKey] = status
         }
     }

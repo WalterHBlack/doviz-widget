@@ -288,8 +288,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   color = if (isSource) colors.primary else colors.onSurfaceVariant)
                           }
                           Column(Modifier.weight(1f).padding(start = 8.dp), horizontalAlignment = Alignment.End) {
-                              Text(if (isSource && !model.amountIsConversion) amount
-                                  else converted?.let { CurrencyMath.format(it) } ?: "—",
+                              Text(if (isSource && !model.amountIsConversion && amount != "0,00") amount
+                                  else converted?.let { CurrencyMath.format(it, model.decimalPlaces) } ?: "—",
                                   fontWeight = FontWeight.Normal, fontSize = (24.sp.value * uiScale).sp,
                                   color = if (isSource) colors.primary else colors.onSurface,
                                   maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -322,7 +322,9 @@ fun ConverterScreen(model: ConverterViewModel) {
                     value = amount,
                     sourceCurrency = from,
                     amountIsConversion = model.amountIsConversion,
+                    decimalPlaces = model.decimalPlaces,
                     onValueChange = model::editAmount,
+                    onCalculated = model::calculatedAmount,
                     onRefresh = model::refresh,
                     colors = colors,
                     onToggle = {
@@ -362,7 +364,9 @@ private fun CurrencyKeyboard(
     value: String,
     sourceCurrency: String,
     amountIsConversion: Boolean,
+    decimalPlaces: Int,
     onValueChange: (String) -> Unit,
+    onCalculated: (String) -> Unit,
     onRefresh: () -> Unit,
     colors: ColorScheme,
     onToggle: () -> Unit,
@@ -388,7 +392,7 @@ private fun CurrencyKeyboard(
             // Dönüşüm hassasiyeti ilk düzenlemeye kadar korunur. Silme, görünen
             // iki ondalıklı değerden başlar; gizli basamaklar silinmez.
             val visibleInput = runCatching {
-                WidgetCalculator.evaluate(value).setScale(2, java.math.RoundingMode.HALF_UP)
+                WidgetCalculator.evaluate(value).setScale(decimalPlaces, java.math.RoundingMode.HALF_UP)
                     .toPlainString().replace('.', ',').replace('-', '−')
             }.getOrDefault(value)
             onValueChange(WidgetCalculator.edit(visibleInput, key))
@@ -398,7 +402,7 @@ private fun CurrencyKeyboard(
         }
         if (key == "=") {
             runCatching { WidgetCalculator.evaluate(value) }.getOrNull()?.let {
-                onValueChange(WidgetCalculator.input(it))
+                onCalculated(WidgetCalculator.input(it))
                 calculated = true
                 freshInput = false
             }

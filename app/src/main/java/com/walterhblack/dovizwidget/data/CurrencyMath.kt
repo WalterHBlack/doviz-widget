@@ -25,7 +25,7 @@ object CurrencyMath {
     }
 
     fun format(value: BigDecimal, decimals: Int = 2): String =
-        DecimalFormat("#,##0." + "0".repeat(decimals), DecimalFormatSymbols(Locale.forLanguageTag("tr-TR")))
+        DecimalFormat("#,##0" + if (decimals > 0) "." + "0".repeat(decimals) else "", DecimalFormatSymbols(Locale.forLanguageTag("tr-TR")))
             .apply { roundingMode = RoundingMode.HALF_UP }.format(value)
 }
 

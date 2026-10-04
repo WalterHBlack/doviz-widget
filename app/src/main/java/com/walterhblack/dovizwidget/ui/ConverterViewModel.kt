@@ -24,10 +24,21 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
         amount = value
         amountIsConversion = false
     }
+    fun calculatedAmount(value: String) {
+        amount = value
+        amountIsConversion = true
+    }
     var favorites by mutableStateOf(repository.favorites()); private set
     var homeFavorites by mutableStateOf(repository.homeFavorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
     var uiScale by mutableStateOf(repository.uiScale()); private set
+    var decimalPlaces by mutableStateOf(repository.decimalPlaces()); private set
+    fun updateDecimalPlaces(value: Int) {
+        if (value !in listOf(0, 2, 4)) return
+        decimalPlaces = value
+        repository.setDecimalPlaces(value)
+        viewModelScope.launch { publishWidgetState(getApplication()) }
+    }
     var sourceCurrency by mutableStateOf(repository.sourceCurrency().takeIf { it in homeFavorites }
         ?: homeFavorites.first()); private set
 

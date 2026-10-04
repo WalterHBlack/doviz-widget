@@ -369,6 +369,10 @@ internal fun SettingsScreen(model: ConverterViewModel, onFavorites: () -> Unit, 
                         ChoiceButtons(listOf("compact" to "Küçük", "normal" to "Normal", "large" to "Büyük"),
                             model.uiScale, model::setInterfaceScale)
                     }
+                    SettingsSection("Ondalık basamak", "Uygulama ve widget sonuçları. Hesaplama hassasiyeti korunur.") {
+                        ChoiceButtons(listOf("0" to "0", "2" to "2", "4" to "4"),
+                            model.decimalPlaces.toString(), { model.updateDecimalPlaces(it.toInt()) })
+                    }
                     val scale = when (model.uiScale) { "compact" -> 0.9f; "large" -> 1.1f; else -> 1f }
                     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
                         Column(Modifier.padding(20.dp)) {
@@ -378,7 +382,8 @@ internal fun SettingsScreen(model: ConverterViewModel, onFavorites: () -> Unit, 
                                 CurrencyFlag("USD", Modifier.size(44.dp * scale, 32.dp * scale))
                                 Text("USD", Modifier.padding(start = 12.dp), fontSize = (20f * scale).sp)
                                 Spacer(Modifier.weight(1f))
-                                Text("0,00", fontSize = (26f * scale).sp, color = MaterialTheme.colorScheme.primary)
+                                Text(com.walterhblack.dovizwidget.data.CurrencyMath.format(java.math.BigDecimal("4900.8612"), model.decimalPlaces),
+                                    fontSize = (26f * scale).sp, color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }

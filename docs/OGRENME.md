@@ -64,6 +64,8 @@ val result: String? = null // ?: değer henüz olmayabilir
 
 ## Kur hesabı
 
+Ayarlar > Ondalık basamak seçimi `RateRepository` içinde `decimal_places` olarak saklanır; 0, 2 veya 4 seçilebilir, varsayılan 2'dir. `ConverterViewModel` uygulamayı, `publishWidgetState` widget'ları günceller. Sonuçları biçimlendirme hesabın saklanan hassasiyetini değiştirmez. İlk silme seçilen basamak sayısıyla gösterilmiş tutarı düzenler; yazma sırasında gerçek girdi görünür. Sıfır basamak seçildiğinde virgül de gösterilmez.
+
 Kaynak değişiminden gelen tutar iki ondalıkla gösterilir, hesap hassasiyeti ilk düzenlemeye kadar saklanır. İlk geri silme, görünür iki ondalıklı sayıdan başlar. Sonraki girişlerde seçili satır düzenlenen ifadeyi doğrudan gösterir; örneğin `4900,86 → 4900,8 → 4900,` akışında gizli rakam veya otomatik eklenen sıfır silinmez. `ConverterViewModel.amountIsConversion` bu ayrımı tutar.
 
 Kaynak para birimi değiştiğinde `WidgetCalculator.changeCurrency` mevcut ifadeyi hesaplayıp yeni birime çevirir. Örneğin 100 TRY yazılıyken USD seçilirse dolar karşılığı yeni tutar olur; diğer satırlar aynı değeri göstermeye devam eder. Uygulama tutarı `ConverterViewModel` içinde tutar; widget kendi kalıcı durumunu günceller. Negatif tutarın işareti korunur. Tamamlanmamış işlem veya eksik kur verisinde kaynak değiştirilmez ve hata gösterilir. Kaynak değişiminden sonraki ilk rakam yeni tutar başlatır; işlem tuşları dönüştürülmüş tutarla devam eder.

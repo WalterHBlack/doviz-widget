@@ -46,6 +46,8 @@ internal fun valueViews(
     scale: Float,
     appWidgetId: Int,
     rowPadding: Float,
+    decimalPlaces: Int,
+    showRoundedSource: Boolean,
 ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_values).apply {
     val density = context.resources.displayMetrics.density
     val verticalPadding = (rowPadding * density).roundToInt()
@@ -74,7 +76,7 @@ internal fun valueViews(
     setTextViewTextSize(R.id.widget_calculation_message, TypedValue.COMPLEX_UNIT_SP, 11f * scale)
     setInt(R.id.widget_calculation_message, "setMaxLines", 2)
     setTextViewTextSize(R.id.widget_empty, TypedValue.COMPLEX_UNIT_SP, 12f * scale)
-    applyValues(expression, target, snapshot, favorites)
+    applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource)
 }
 
 // Sabit XML kimlikleri sayesinde Glance kompozisyonu ve klavye kurulmadan
@@ -86,14 +88,17 @@ internal fun updateWidgetValues(
     target: String,
     snapshot: RateSnapshot?,
     favorites: Set<String>,
+    decimalPlaces: Int,
+    showRoundedSource: Boolean,
 ) {
     val patch = RemoteViews(context.packageName, R.layout.widget_values).apply {
-        applyValues(expression, target, snapshot, favorites)
+        applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource)
     }
     AppWidgetManager.getInstance(context).partiallyUpdateAppWidget(appWidgetId, patch)
 }
 
-private fun RemoteViews.applyValues(expression: String, target: String, snapshot: RateSnapshot?, favorites: Set<String>) {
+private fun RemoteViews.applyValues(expression: String, target: String, snapshot: RateSnapshot?, favorites: Set<String>,
+    decimalPlaces: Int, showRoundedSource: Boolean) {
     val calculation = runCatching { WidgetCalculator.evaluate(expression) }
     val amount = calculation.getOrNull()
     val codes = currencyNames.keys.filter { it in favorites }.take(4)
@@ -108,7 +113,8 @@ private fun RemoteViews.applyValues(expression: String, target: String, snapshot
             }
         }
         val selected = code == target
-        setTextViewText(row.value, if (selected) expression else converted?.let { CurrencyMath.format(it) } ?: "—")
+        setTextViewText(row.value, if (selected && !showRoundedSource) expression
+            else converted?.let { CurrencyMath.format(it, decimalPlaces) } ?: "—")
         setInt(row.content, "setBackgroundColor", android.graphics.Color.parseColor(if (selected) "#18392E" else "#101B17"))
         val color = android.graphics.Color.parseColor(if (selected) "#A5F3CF" else "#F0FFF7")
         setTextColor(row.codeView, color)

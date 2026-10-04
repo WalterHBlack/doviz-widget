@@ -97,6 +97,10 @@ class RateRepository(context: Context) {
     fun theme(): String = prefs.getString("theme", "system")!!
     fun setTheme(value: String) { prefs.edit().putString("theme", value).apply() }
     fun uiScale(): String = prefs.getString("ui_scale", "normal")!!
+    fun decimalPlaces(): Int = prefs.getInt("decimal_places", 2).takeIf { it in listOf(0, 2, 4) } ?: 2
+    fun setDecimalPlaces(value: Int) {
+        if (value in listOf(0, 2, 4)) prefs.edit().putInt("decimal_places", value).apply()
+    }
     fun setUiScale(value: String) { prefs.edit().putString("ui_scale", value).apply() }
     fun sourceCurrency(): String = prefs.getString("source_currency", "USD")
         ?.takeIf { it in currencyNames } ?: "USD"
