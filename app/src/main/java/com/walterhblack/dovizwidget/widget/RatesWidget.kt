@@ -178,8 +178,21 @@ class CalculatorAction : ActionCallback {
                         val favorites = state[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()
                             ?: RateRepository(context).favorites()
                         if (code in favorites) {
-                            state[sourceKey] = code
-                            state[evaluatedKey] = true
+                            val oldSource = state[sourceKey]?.takeIf { it in favorites }
+                                ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD"
+                            if (oldSource != code) {
+                                val snapshot = state[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
+                                    ?: RateRepository(context).cached()
+                                runCatching { WidgetCalculator.changeCurrency(expression, oldSource, code, snapshot) }
+                                    .onSuccess {
+                                        state[expressionKey] = it
+                                        state[sourceKey] = code
+                                        state[evaluatedKey] = true
+                                        state[statusKey] = ""
+                                    }.onFailure {
+                                        state[statusKey] = it.message ?: "Para birimi değiştirilemedi."
+                                    }
+                            }
                         }
                     }
                     key == "=" -> {
@@ -198,7 +211,7 @@ class CalculatorAction : ActionCallback {
             }
             calculatorStates[glanceId] = updatedState
             // Eski APK'daki tuş ilk basışta yeni satır düzenini kurar.
-            if (parameters[partialInputParameter] == true && glanceId is AppWidgetId) {
+            if (parameters[partialInputParameter] == true && !key.startsWith("source:") && glanceId is AppWidgetId) {
                 val snapshot = updatedState[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
                     ?: RateRepository(context).cached()
                 val favorites = updatedState[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()

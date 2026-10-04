@@ -17,6 +17,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     var snapshot by mutableStateOf(repository.cached()); private set
     var loading by mutableStateOf(false); private set
     var error by mutableStateOf<String?>(null); private set
+    var amount by mutableStateOf("0,00")
     var favorites by mutableStateOf(repository.favorites()); private set
     var homeFavorites by mutableStateOf(repository.homeFavorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
@@ -72,7 +73,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
             this[index] = newCode
             if (previousIndex >= 0) this[previousIndex] = oldCode
         }
-        if (sourceCurrency == oldCode) setSelectedSourceCurrency(newCode)
+        if (sourceCurrency == oldCode && !setSelectedSourceCurrency(newCode)) return
         updateHomeFavorites(updated)
     }
 
@@ -84,18 +85,30 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun updateHomeFavorites(codes: List<String>) {
+        if (sourceCurrency !in codes && !setSelectedSourceCurrency(codes.first())) return
         homeFavorites = codes
         repository.setHomeFavorites(codes)
-        if (sourceCurrency !in codes) setSelectedSourceCurrency(codes.first())
     }
 
     fun setAppearance(value: String) { theme = value; repository.setTheme(value) }
     fun setInterfaceScale(value: String) { uiScale = value; repository.setUiScale(value) }
-    fun setSelectedSourceCurrency(value: String) {
+    fun setSelectedSourceCurrency(value: String): Boolean {
         if (value in com.walterhblack.dovizwidget.data.currencyNames) {
+            if (value == sourceCurrency) return true
+            val converted = runCatching {
+                com.walterhblack.dovizwidget.data.WidgetCalculator.changeCurrency(amount, sourceCurrency, value, snapshot)
+            }
+            if (converted.isFailure) {
+                error = converted.exceptionOrNull()?.message ?: "Para birimi değiştirilemedi."
+                return false
+            }
+            amount = converted.getOrThrow()
             sourceCurrency = value
             repository.setSourceCurrency(value)
+            error = null
+            return true
         }
+        return false
     }
 }
 

@@ -92,7 +92,7 @@ fun ConverterScreen(model: ConverterViewModel) {
         )
     ) {
         Surface(Modifier.fillMaxSize()) {
-            var amount by remember { mutableStateOf("0,00") }
+            val amount = model.amount
             val from = model.sourceCurrency
             val rowCodes = model.homeFavorites
             val rowHeights = remember { mutableStateMapOf<String, Int>() }
@@ -319,7 +319,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                 }
                 CurrencyKeyboard(
                     value = amount,
-                    onValueChange = { amount = it },
+                    sourceCurrency = from,
+                    onValueChange = { model.amount = it },
                     onRefresh = model::refresh,
                     colors = colors,
                     onToggle = {
@@ -357,6 +358,7 @@ private enum class KeyboardMode { Collapsed, Docked }
 @Composable
 private fun CurrencyKeyboard(
     value: String,
+    sourceCurrency: String,
     onValueChange: (String) -> Unit,
     onRefresh: () -> Unit,
     colors: ColorScheme,
@@ -376,8 +378,8 @@ private fun CurrencyKeyboard(
     val utilityKey = Color(0xFF254238)
     val equalsKey = Color(0xFF357C5B)
     val keyDivider = Color(0xFF101512)
-    var calculated by rememberSaveable { mutableStateOf(false) }
-    var freshInput by rememberSaveable { mutableStateOf(true) }
+    var calculated by rememberSaveable(sourceCurrency) { mutableStateOf(false) }
+    var freshInput by rememberSaveable(sourceCurrency) { mutableStateOf(true) }
     fun press(key: String) {
         if (key == "=") {
             runCatching { WidgetCalculator.evaluate(value) }.getOrNull()?.let {

@@ -58,6 +58,18 @@ object WidgetCalculator {
         return result
     }
 
+    fun changeCurrency(expression: String, from: String, to: String, snapshot: RateSnapshot?): String {
+        if (from == to) return expression
+        val amount = evaluate(expression)
+        if (amount.signum() == 0) return "0,00"
+        val rates = requireNotNull(snapshot) { "Kur değiştirmek için önce kurları yenile." }.rates
+        require(from in rates && to in rates) { "Bu para birimi için kur verisi yok. Kurları yenile." }
+        val converted = CurrencyMath.convert(amount.abs(), from, to, rates)
+        val result = input(if (amount.signum() < 0) converted.negate() else converted)
+        evaluate(result)
+        return result
+    }
+
     fun input(value: BigDecimal): String = value.setScale(6, java.math.RoundingMode.HALF_UP)
         .stripTrailingZeros().toPlainString().replace('.', ',').replace('-', '−')
 }

@@ -64,6 +64,8 @@ val result: String? = null // ?: değer henüz olmayabilir
 
 ## Kur hesabı
 
+Kaynak para birimi değiştiğinde `WidgetCalculator.changeCurrency` mevcut ifadeyi hesaplayıp yeni birime çevirir. Örneğin 100 TRY yazılıyken USD seçilirse dolar karşılığı yeni tutar olur; diğer satırlar aynı değeri göstermeye devam eder. Uygulama tutarı `ConverterViewModel` içinde tutar; widget kendi kalıcı durumunu günceller. Negatif tutarın işareti korunur. Tamamlanmamış işlem veya eksik kur verisinde kaynak değiştirilmez ve hata gösterilir. Kaynak değişiminden sonraki ilk rakam yeni tutar başlatır; işlem tuşları dönüştürülmüş tutarla devam eder.
+
 Tüm kurlar 1 EUR karşılığı olarak gelir. Örnek **uydurma test verisi**: 1 EUR = 1,25 USD, 1 EUR = 50 TRY.
 
 10 USD → TRY: `10 / 1,25 × 50 = 400 TRY`.
