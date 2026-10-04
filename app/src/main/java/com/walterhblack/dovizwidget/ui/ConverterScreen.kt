@@ -288,7 +288,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                                   color = if (isSource) colors.primary else colors.onSurfaceVariant)
                           }
                           Column(Modifier.weight(1f).padding(start = 8.dp), horizontalAlignment = Alignment.End) {
-                              Text(converted?.let { CurrencyMath.format(it) } ?: "—",
+                              Text(if (isSource && !model.amountIsConversion) amount
+                                  else converted?.let { CurrencyMath.format(it) } ?: "—",
                                   fontWeight = FontWeight.Normal, fontSize = (24.sp.value * uiScale).sp,
                                   color = if (isSource) colors.primary else colors.onSurface,
                                   maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -320,7 +321,8 @@ fun ConverterScreen(model: ConverterViewModel) {
                 CurrencyKeyboard(
                     value = amount,
                     sourceCurrency = from,
-                    onValueChange = { model.amount = it },
+                    amountIsConversion = model.amountIsConversion,
+                    onValueChange = model::editAmount,
                     onRefresh = model::refresh,
                     colors = colors,
                     onToggle = {
@@ -359,6 +361,7 @@ private enum class KeyboardMode { Collapsed, Docked }
 private fun CurrencyKeyboard(
     value: String,
     sourceCurrency: String,
+    amountIsConversion: Boolean,
     onValueChange: (String) -> Unit,
     onRefresh: () -> Unit,
     colors: ColorScheme,
@@ -381,6 +384,18 @@ private fun CurrencyKeyboard(
     var calculated by rememberSaveable(sourceCurrency) { mutableStateOf(false) }
     var freshInput by rememberSaveable(sourceCurrency) { mutableStateOf(true) }
     fun press(key: String) {
+        if (key == "⌫" && amountIsConversion) {
+            // Dönüşüm hassasiyeti ilk düzenlemeye kadar korunur. Silme, görünen
+            // iki ondalıklı değerden başlar; gizli basamaklar silinmez.
+            val visibleInput = runCatching {
+                WidgetCalculator.evaluate(value).setScale(2, java.math.RoundingMode.HALF_UP)
+                    .toPlainString().replace('.', ',').replace('-', '−')
+            }.getOrDefault(value)
+            onValueChange(WidgetCalculator.edit(visibleInput, key))
+            calculated = false
+            freshInput = false
+            return
+        }
         if (key == "=") {
             runCatching { WidgetCalculator.evaluate(value) }.getOrNull()?.let {
                 onValueChange(WidgetCalculator.input(it))

@@ -17,7 +17,13 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     var snapshot by mutableStateOf(repository.cached()); private set
     var loading by mutableStateOf(false); private set
     var error by mutableStateOf<String?>(null); private set
-    var amount by mutableStateOf("0,00")
+    var amount by mutableStateOf("0,00"); private set
+    var amountIsConversion by mutableStateOf(false); private set
+
+    fun editAmount(value: String) {
+        amount = value
+        amountIsConversion = false
+    }
     var favorites by mutableStateOf(repository.favorites()); private set
     var homeFavorites by mutableStateOf(repository.homeFavorites()); private set
     var theme by mutableStateOf(repository.theme()); private set
@@ -103,6 +109,7 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
                 return false
             }
             amount = converted.getOrThrow()
+            amountIsConversion = true
             sourceCurrency = value
             repository.setSourceCurrency(value)
             error = null

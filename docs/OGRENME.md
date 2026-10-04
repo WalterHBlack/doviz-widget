@@ -64,6 +64,8 @@ val result: String? = null // ?: değer henüz olmayabilir
 
 ## Kur hesabı
 
+Kaynak değişiminden gelen tutar iki ondalıkla gösterilir, hesap hassasiyeti ilk düzenlemeye kadar saklanır. İlk geri silme, görünür iki ondalıklı sayıdan başlar. Sonraki girişlerde seçili satır düzenlenen ifadeyi doğrudan gösterir; örneğin `4900,86 → 4900,8 → 4900,` akışında gizli rakam veya otomatik eklenen sıfır silinmez. `ConverterViewModel.amountIsConversion` bu ayrımı tutar.
+
 Kaynak para birimi değiştiğinde `WidgetCalculator.changeCurrency` mevcut ifadeyi hesaplayıp yeni birime çevirir. Örneğin 100 TRY yazılıyken USD seçilirse dolar karşılığı yeni tutar olur; diğer satırlar aynı değeri göstermeye devam eder. Uygulama tutarı `ConverterViewModel` içinde tutar; widget kendi kalıcı durumunu günceller. Negatif tutarın işareti korunur. Tamamlanmamış işlem veya eksik kur verisinde kaynak değiştirilmez ve hata gösterilir. Kaynak değişiminden sonraki ilk rakam yeni tutar başlatır; işlem tuşları dönüştürülmüş tutarla devam eder.
 
 Tüm kurlar 1 EUR karşılığı olarak gelir. Örnek **uydurma test verisi**: 1 EUR = 1,25 USD, 1 EUR = 50 TRY.
