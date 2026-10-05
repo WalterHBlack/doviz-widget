@@ -48,6 +48,7 @@ internal fun valueViews(
     rowPadding: Float,
     decimalPlaces: Int,
     showRoundedSource: Boolean,
+    sourceError: String?,
 ): RemoteViews = RemoteViews(context.packageName, R.layout.widget_values).apply {
     val density = context.resources.displayMetrics.density
     val verticalPadding = (rowPadding * density).roundToInt()
@@ -76,7 +77,7 @@ internal fun valueViews(
     setTextViewTextSize(R.id.widget_calculation_message, TypedValue.COMPLEX_UNIT_SP, 11f * scale)
     setInt(R.id.widget_calculation_message, "setMaxLines", 2)
     setTextViewTextSize(R.id.widget_empty, TypedValue.COMPLEX_UNIT_SP, 12f * scale)
-    applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource)
+    applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource, sourceError)
 }
 
 // Sabit XML kimlikleri sayesinde Glance kompozisyonu ve klavye kurulmadan
@@ -90,15 +91,16 @@ internal fun updateWidgetValues(
     favorites: Set<String>,
     decimalPlaces: Int,
     showRoundedSource: Boolean,
+    sourceError: String?,
 ) {
     val patch = RemoteViews(context.packageName, R.layout.widget_values).apply {
-        applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource)
+        applyValues(expression, target, snapshot, favorites, decimalPlaces, showRoundedSource, sourceError)
     }
     AppWidgetManager.getInstance(context).partiallyUpdateAppWidget(appWidgetId, patch)
 }
 
 private fun RemoteViews.applyValues(expression: String, target: String, snapshot: RateSnapshot?, favorites: Set<String>,
-    decimalPlaces: Int, showRoundedSource: Boolean) {
+    decimalPlaces: Int, showRoundedSource: Boolean, sourceError: String?) {
     val calculation = runCatching { WidgetCalculator.evaluate(expression) }
     val amount = calculation.getOrNull()
     val codes = currencyNames.keys.filter { it in favorites }.take(4)
@@ -122,6 +124,7 @@ private fun RemoteViews.applyValues(expression: String, target: String, snapshot
         setContentDescription(row.row, "${code.orEmpty()}${if (selected) ", kaynak para birimi" else ", kaynak olarak seç"}")
     }
     val message = when {
+        !sourceError.isNullOrBlank() -> sourceError
         calculation.isFailure -> calculation.exceptionOrNull()?.message ?: "İşlemi tamamla."
         snapshot == null -> "Kurlar için ↻ tuşuna dokun."
         else -> ""

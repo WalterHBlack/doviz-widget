@@ -35,6 +35,7 @@ private val snapshotKey = stringPreferencesKey("snapshot")
 private val favoritesKey = stringPreferencesKey("favorites")
 private val decimalPlacesKey = intPreferencesKey("decimal_places")
 private val statusKey = stringPreferencesKey("status")
+private val sourceErrorKey = stringPreferencesKey("source_error")
 private val expressionKey = stringPreferencesKey("calculator_expression")
 private val sourceKey = stringPreferencesKey("calculator_source")
 private val evaluatedKey = booleanPreferencesKey("calculator_evaluated")
@@ -138,7 +139,7 @@ class RatesWidget : GlanceAppWidget() {
                 Column(GlanceModifier.fillMaxWidth().defaultWeight()) {
                     AndroidRemoteViews(valueViews(context, expression, source, snapshot, favorites, scale,
                         (id as AppWidgetId).appWidgetId, rowPadding, decimals,
-                        inputState[evaluatedKey] ?: true), modifier = GlanceModifier.fillMaxWidth())
+                        inputState[evaluatedKey] ?: true, inputState[sourceErrorKey]), modifier = GlanceModifier.fillMaxWidth())
                 }
                 Spacer(GlanceModifier.height(sectionGap))
                 Text(state[statusKey]?.takeIf { it.isNotBlank() } ?: "Kur: ${snapshot?.date ?: "—"} · Günlük referans",
@@ -175,6 +176,7 @@ class CalculatorAction : ActionCallback {
             lateinit var updatedState: Preferences
             updateAppWidgetState(context, glanceId) { state ->
                 val expression = state[expressionKey] ?: "0,00"
+                state.remove(sourceErrorKey)
                 when {
                     key.startsWith("source:") -> {
                         val code = key.removePrefix("source:")
@@ -191,9 +193,8 @@ class CalculatorAction : ActionCallback {
                                         state[expressionKey] = it
                                         state[sourceKey] = code
                                         state[evaluatedKey] = true
-                                        state[statusKey] = ""
                                     }.onFailure {
-                                        state[statusKey] = it.message ?: "Para birimi değiştirilemedi."
+                                        state[sourceErrorKey] = it.message ?: "Para birimi değiştirilemedi."
                                     }
                             }
                         }
@@ -227,7 +228,9 @@ class CalculatorAction : ActionCallback {
             }
             calculatorStates[glanceId] = updatedState
             // Eski APK'daki tuş ilk basışta yeni satır düzenini kurar.
-            if (parameters[partialInputParameter] == true && !key.startsWith("source:") && glanceId is AppWidgetId) {
+            // Kaynak seçimi de aynı sabit satırları kullanır: klavyeyi ve Glance
+            // ağacını yeniden kurmadan renk, tutar ve hata mesajını güncelle.
+            if (parameters[partialInputParameter] == true && glanceId is AppWidgetId) {
                 val snapshot = updatedState[snapshotKey]?.let { WidgetSnapshotCache.get(it) }
                     ?: RateRepository(context).cached()
                 val favorites = updatedState[favoritesKey]?.split(',')?.filter { it in currencyNames }?.take(4)?.toSet()
@@ -238,7 +241,7 @@ class CalculatorAction : ActionCallback {
                         updatedState[sourceKey]?.takeIf { it in favorites }
                             ?: currencyNames.keys.firstOrNull { it in favorites } ?: "USD", snapshot, favorites,
                         updatedState[decimalPlacesKey] ?: RateRepository(context).decimalPlaces(),
-                        updatedState[evaluatedKey] ?: true)
+                        updatedState[evaluatedKey] ?: true, updatedState[sourceErrorKey])
                 } catch (_: RuntimeException) {
                     RatesWidget().update(context, glanceId)
                 }

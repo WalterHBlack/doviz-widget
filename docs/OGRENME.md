@@ -35,6 +35,8 @@ Bayraklı satırlardan birine dokununca o para birimi kaynak olur. Satırlar ara
 
 ## Widget hesap makinesi
 
+Kur satırına dokunmak da sayı tuşları gibi kısmi güncelleme kullanır. Seçilen satırın rengi, tutarlar ve hata mesajı aynı RemoteViews güncellemesinde gönderilir; Glance ağacı ve klavye yeniden kurulmaz. Kaynak dönüştürme hatası `source_error` alanında saklanıp satırların altında gösterilir; kur yenileme durumundan ayrıdır. Kaynak ve tutar aynı kilit altında kaydedilir, açık widget oturumu son durumu kullanır.
+
 Sayı, silme ve matematik tuşları bütün Glance görünümünü yeniden oluşturmadan `partiallyUpdateAppWidget` ile satır tutarlarını ve hesaplama mesajını günceller. `WidgetValueViews.kt` ve `widget_values.xml` sabit kimliklerle çalışır. Boyut, kur veya favori değişimi tam görünüm güncellemesi kullanır. Eski widget tuşundan ilk basış yeni düzeni kurar.
 
 Hızlı basışlar sırayla işlenir; her widget'ın girdisi DataStore'a kaydedilir. Açık Glance oturumu boyut değiştirirse eski sayıyı göstermemesi için son girdi oturumda da tutulur. Günlük kur verisi değişmedikçe aynı JSON tekrar çözümlenmez. Performans farkı cihazda ölçülmeden sayısal bir hızlanma iddia edilmez.
